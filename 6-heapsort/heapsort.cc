@@ -135,6 +135,75 @@ void TableDeleteMin(Matrix &M, size_t x, size_t y) {
 }
 
 void TableInsert(Matrix &M, size_t x, size_t y, int key) {
+    if (M[x][y] > key) {
+        swap(M[x][y], key);
+    }
+    if (0x77777777 == key) {
+        return;    
+    }
+
+    int maxv = 0x80000000;
+    size_t nx = x, ny = y;
+
+    if ( x+1 < M.size()) {
+        nx = x + 1;
+        maxv = M[nx][ny];
+    }
+    if ( y+1 < M.front().size() && M[x][y+1] > maxv) {
+        nx = x;
+        ny = y + 1;
+    }
+    
+    if (nx != x || ny != y) {
+        TableInsert(M, nx, ny, key);
+    }
+}
+
+void TableSort(vector<int> &A) {
+    size_t n = sqrt(A.size());
+    assert(n*n == A.size());
+
+    Matrix M(n);
+    for (auto &vec : M) {
+        vec.assign(n, 0x77777777);
+    }
+
+    for (int num : A) {
+        TableInsert(M, 0, 0, num);
+    }
+
+    for (size_t i = 0; i < A.size(); ++i) {
+        A[i] = M[0][0];
+        TableDeleteMin(M, 0, 0);
+    }
+}
+
+bool TableSearch(Matrix &M, int key) {
+    int x = 0, y = 0; 
+
+    while (y < int(M.front().size())) {
+        cout << x << " " << y << endl;
+        if (M[x][y] == key) {
+            return true;
+        } else if (M[x][y] > key) {
+            break;
+        }
+        ++y;
+    }
+    --y;
+
+    while (++x < int(M.size())) {
+        while (y >= 0) {
+            cout << x << " " << y << endl;
+            if (M[x][y] == key) {
+                return true;
+            } else if (M[x][y] < key) {
+                break;
+            }
+            --y;
+        }
+    }
+    return false;
 }
 
 /******************************************************************************/
@@ -173,8 +242,9 @@ int main() {
                 { 4, 5, 7, 9, 14},
                 { 8, 9, 10, 11, 15},
                 { 10, 11, 14, 16, 17},
-                { 12, 13, 15, 17, 18} };
+                { 12, 14, 15, 17, 18} };
 
+    /*
     for (int i = 0; i < 25; ++i) {
         TableDeleteMin(M, 0, 0);
         cout << IsYoungTableaus(M) << endl; 
@@ -185,6 +255,26 @@ int main() {
             cout << endl;
         }
     }
+    */
+
+    cout << endl;
+    cout << TableSearch(M, 18) << endl;
+
+    /*
+    TableInsert(M, 0, 0, 9);
+    for (auto vec : M) {
+        for (auto num : vec) {
+            cout << num << ' ';
+        }
+        cout << endl;
+    }
+
+    A = GeneratorAarray(100);
+    TableSort(A);
+    for (int num : A) {
+        cout << num << endl;
+    }
+    */
 }
 
 
