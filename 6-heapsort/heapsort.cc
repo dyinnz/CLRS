@@ -89,7 +89,7 @@ void HeapIncreaseKey(vector<int> &A, size_t pos, int key) {
 }
 
 void MaxHeapInsert(vector<int> &A, int key) {
-    A.push_back(0x80000000);
+    A.push_back(INT_MAX);
     HeapIncreaseKey(A, A.size()-1, key);
 }
 
@@ -119,7 +119,7 @@ bool IsYoungTableaus(Matrix &M) {
 
 void TableDeleteMin(Matrix &M, size_t x, size_t y) {
     size_t nx = x, ny = y;
-    M[nx][ny] = 0x77777777;
+    M[nx][ny] = INT_MAX;
     if ( x+1 < M.size() && M[x+1][y] < M[nx][ny]) {
         nx = x + 1;
     }
@@ -138,11 +138,11 @@ void TableInsert(Matrix &M, size_t x, size_t y, int key) {
     if (M[x][y] > key) {
         swap(M[x][y], key);
     }
-    if (0x77777777 == key) {
+    if (INT_MAX == key) {
         return;    
     }
 
-    int maxv = 0x80000000;
+    int maxv = INT_MIN;
     size_t nx = x, ny = y;
 
     if ( x+1 < M.size()) {
@@ -165,7 +165,7 @@ void TableSort(vector<int> &A) {
 
     Matrix M(n);
     for (auto &vec : M) {
-        vec.assign(n, 0x77777777);
+        vec.assign(n, INT_MAX);
     }
 
     for (int num : A) {
