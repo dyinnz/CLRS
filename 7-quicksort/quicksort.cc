@@ -28,9 +28,33 @@ int RandomizedParition(vector<int> &A, int l, int r) {
     return Partition(A, l, r);
 }
 
+pair<int, int> PartitionEqual(vector<int> &A, int l, int r) {
+    int x = A[r];
+    int i = l - 1, j = r + 1;
+    int k = l;
+    while (k < j) {
+        if (A[k] < x) {
+            swap(A[++i], A[k]);
+            ++k;
+        } else if (A[k] > x) {
+            swap(A[--j], A[k]);
+        } else {
+            ++k;
+        }
+    }
+    return {i, j};
+}
+
+pair<int, int> RandomizedParitionEqual(vector<int> &A, int l, int r) {
+    int p = rand()%(r-l) + l; 
+    swap(A[r], A[p]);
+    return PartitionEqual(A, l, r);
+}
+
 void QuickSort(vector<int> &A, int l, int r) {
     if (l < r) {
-        size_t q = Partition(A, l, r);
+        // size_t q = Partition(A, l, r);
+        int q = RandomizedParition(A, l, r);
         QuickSort(A, l, q-1);
         QuickSort(A, q+1, r);
     }
@@ -60,15 +84,38 @@ void QuickSortHoare(vector<int> &A, int l, int r) {
      */
 }
 
-int main() {
-    // auto A = GeneratorAarray(100);
-    // QuickSort(A, 0, A.size()-1);
+void QuickSortEqual(vector<int> &A, int l, int r) {
+    if (l < r) {
+        auto p = PartitionEqual(A, l, r);
+        QuickSortEqual(A, l, p.first);
+        QuickSortEqual(A, p.second, r);
+    }
+}
 
-    vector<int> A {0, 1};
-    // Here are some bugs
-    QuickSortHoare(A, 0, A.size()-1);
+void TailRecursiveQuickSort(vector<int> &A, int l, int r) {
+    while (l < r) {
+        int q = Partition(A, l, r);
+        if (q-l <= r-q) {
+            TailRecursiveQuickSort(A, l, q-1);
+            l = q + 1;
+        } else {
+            TailRecursiveQuickSort(A, q+1, r);
+            r = q - 1;
+        }
+    }
+}
+
+int main() {
+    auto A = GeneratorAarray(100);
+    //vector<int> A;
+    srand(time(NULL));
+    //generate_n(back_inserter(A), 100, [](){ return (rand()&0xf);} );
+    //QuickSort(A, 0, A.size()-1);
+    //QuickSortEqual(A, 0, A.size()-1);
+    TailRecursiveQuickSort(A, 0, A.size()-1);
     for (int num : A) {
         cout << num << endl;
     }
     return 0;
 }
+
