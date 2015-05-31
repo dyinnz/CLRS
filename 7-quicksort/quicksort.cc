@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <climits>
 using namespace std;
 
 vector<int> GeneratorAarray(int n) {
@@ -105,6 +106,38 @@ void TailRecursiveQuickSort(vector<int> &A, int l, int r) {
     }
 }
 
+void FuzzySortRecursion(vector<pair<int, int>> &A, int l, int r, int limit) {
+    if (l < r) {
+        int i = l-1;
+        int j = r;
+        int k = l;
+        int maxr = limit;
+        auto x = A[r];
+        while (k < j) {
+            if (A[k].second <= limit) {
+                swap(A[++i], A[k]);
+                ++k;
+            } else if (A[k].first <= x.first) {
+                if (A[k].second > maxr) {
+                    maxr = A[k].second;
+                }
+                ++k;
+            } else {
+                swap(A[--j], A[k]);
+            }
+        }
+        swap(A[j], A[r]);
+
+        // Recursion
+        FuzzySortRecursion(A, i+1, j-1, limit);
+        FuzzySortRecursion(A, j+1, r, maxr);
+    }
+}
+
+void FuzzySortIntervals(vector<pair<int, int>> &A) {
+    FuzzySortRecursion(A, 0, A.size()-1, INT_MIN);
+}
+
 int main() {
     auto A = GeneratorAarray(100);
     //vector<int> A;
@@ -116,6 +149,19 @@ int main() {
     for (int num : A) {
         cout << num << endl;
     }
+
+    auto g = []() {
+        int l = rand() % 100;
+        int r = rand() % 200 + l;
+        return make_pair(l, r);
+    };
+    vector<pair<int, int>> I;
+    generate_n(back_inserter(I), 40, g);
+    FuzzySortIntervals(I);
+    for (auto p : I) {
+        cout << p.first << '\t' << p.second << endl;
+    }
+
     return 0;
 }
 
