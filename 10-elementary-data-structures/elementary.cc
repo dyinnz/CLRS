@@ -396,105 +396,6 @@ private:
     Node *head_;
 };
 
-/*
-class BinaryTree {
-public:
-    struct Node {
-        Node *left, *right, *parent;
-        int x;
-    };
-
-    BinaryTree() : root_(0) {}
-
-    ~BinaryTree() {
-        Delete(root_);
-    }
-
-    void InsertX(int x) {
-        Node *p = root_;
-        Node **last = &root_;
-        while (p) {
-            if (x < p->x) {
-                last = &p->left;
-                p = p->left; 
-            } else if (x > p->x) {
-                last = &p->right;
-                p = p->right;
-            } else {
-                return;
-            }
-        }
-        p = new Node;
-        p->left = NULL;
-        p->right = NULL;
-        p->parent = *last;
-        p->x = x;
-        *last = p;
-    }
-    
-    void Insert(int x) {
-        root_ = Insert(root_, x);
-    }
-
-    Node* Search(int x) {
-        return Search(root_, x);
-    }
-
-    void Print() {
-        Print(root_);
-    }
-
-private:
-    Node* Insert(Node *root, int x) {
-        if (!root) {
-            root = new Node;
-            root->left = NULL;
-            root->right = NULL;
-            root->x = x;
-        } else {
-            if (x < root->x) {
-                root->left = Insert(root->left, x);
-            } else if (x > root->x) {
-                root->right = Insert(root->right, x);
-            } else {
-                // do nothing
-            }
-        }
-        return root;
-    }
-
-    Node* Search(Node *root, int x) {
-        if (root) {
-            if (x < root->x) {
-                return Search(root->left, x);
-            } else if (x > root->x) {
-                return Search(root->right, x);
-            } else {
-                return root;
-            }
-        }
-        return 0;
-    }
-
-    void Print(Node *root) {
-        if (root) {
-            Print(root->left);
-            cout << root->x << endl;
-            Print(root->right);
-        }
-    }
-
-    void Delete(Node *root) {
-        if (root) {
-            Delete(root->left);
-            Delete(root->right);
-            delete root;
-        }
-    }
-
-    Node *root_;
-};
-*/
 
 int main() {
     Stack<int> s;
@@ -589,15 +490,5 @@ int main() {
     xl.Print();
     cout << xl.Search(1)->x << endl;
 
-    /*
-    BinaryTree tree;
-    tree.Insert(5);
-    tree.Insert(2);
-    tree.Insert(8);
-    tree.Insert(3);
-    tree.Insert(6);
-    tree.Print();
-    */
-
-    return 0;
+   return 0;
 }
