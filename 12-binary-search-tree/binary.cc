@@ -111,6 +111,7 @@ public:
             next->left = p->left;
             next->left->parent = next;
         }
+        delete p;
     }
 
     void InorderWalk() {
@@ -287,19 +288,21 @@ public:
         inserted->left = nullptr;
         inserted->right = nullptr;
         inserted->x = x;
-    
+
         if (!last) {
             inserted->succ = nullptr;
             root_ = inserted;
+
         } else if (x < last->x) {
+            inserted->succ = last;
             Node *parent = GetParent(last); 
-            if (parent) {
+            if (parent && parent->right == last) {
                 parent->succ = inserted;
             }
-            inserted->succ = last;
 
             last->left = inserted;
-        } else {
+
+       } else {
             inserted->succ = last->succ;
             last->succ = inserted;
 
@@ -309,11 +312,57 @@ public:
 
 
     void Delete(Node *p) {
+        if (!p->left) {
+            Transplant(p, p->right);
+            Node *predec = GetParent(p);
+            if (predec && predec->right == p) {
+                predec->succ = p->succ;
+            }
 
+        } else if (!p->right) {
+            Transplant(p, p->left);
+            Node *predec = Maximum(p->left);
+            predec->succ = p->succ;
+
+        } else {
+            Node *next = p->succ;
+            Node *next_parent = GetParent(next);
+            if (next_parent != p) {
+                Transplant(next, next->right);
+                next->right = p->right;
+            }
+            Transplant(p, next);
+            next->left = p->left;
+
+            Node *predec = Maximum(p->left);
+            predec->succ = p->succ;
+        }
+        
+        delete p;
+    }
+
+    Node* Search(int x) {
+        Node *p = root_;
+        while (p && x != p->x) {
+            if (x < p->x) {
+                p = p->left;
+            } else {
+                p = p->right;
+            }
+        }
+        return p;
     }
 
     void Print() {
         Print(root_);
+    }
+
+    Node *Minimum() {
+        return Minimum(root_);
+    }
+
+    Node *Maximum() {
+        return Maximum(root_);
     }
 
 private:
@@ -334,10 +383,28 @@ private:
     }
 
     void Transplant(Node *old, Node *fresh) {
-        if (root_ == old) {
+        Node *old_parent = GetParent(old);
+        if (!old_parent) {
             root_ = fresh;
+        } else if (old == old_parent->left) {
+            old_parent->left = fresh;
+        } else {
+            old_parent->right = fresh;
         }
-        
+    }
+
+    static Node *Maximum(Node *p) {
+        while (p->right) {
+            p = p->right;
+        }
+        return p;
+    }
+
+    static Node* Minimum(Node *p) {
+        while (p->left) {
+            p = p->left;
+        }
+        return p;
     }
 
     Node *root_;
@@ -366,6 +433,7 @@ int main() {
     tree.InsertX(3);
     tree.InsertX(6);
     tree.InsertX(7);
+
 
     cout << endl;
     tree.InorderWalk();
@@ -398,6 +466,17 @@ int main() {
     cout << endl;
     cout << "Ex tree" << endl;
     tx.Print();
+
+    tx.Delete(tx.Search(3));
+    tx.Delete(tx.Search(5));
+    tx.Delete(tx.Search(8));
+    
+    cout << endl;
+    tx.Print();
+
+    for (auto it = tx.Minimum(); it; it = it->succ) {
+        cout << it->x << endl;
+    }
 
     return 0;
 }
