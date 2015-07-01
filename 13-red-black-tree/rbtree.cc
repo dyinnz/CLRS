@@ -65,7 +65,6 @@ public:
         InsertFixUp(inserted);
     }
 
-    // TODO
     void Delete(Node *p) {
         Node *x = nil_;
         Node *y = p;
@@ -106,7 +105,12 @@ private:
     void Print(Node *p) {
         if (nil_ != p) {
             Print(p->left);
-            cout << p->x << endl;
+            cout << p->x;
+            if (Color::kRed == p->color) {
+                cout << " Red" << endl;
+            } else {
+                cout << " Black" << endl;
+            }
             Print(p->right);
         }
     }
@@ -283,7 +287,224 @@ private:
     Node sentinel_;
 };
 
+class AVLTree {
+public:
+    struct Node {
+        Node *left, *right, *parent;
+        int x; 
+        int height;
+    };
+
+    AVLTree() : root_(0) {}
+
+    ~AVLTree() {
+        Release(root_);
+    }
+
+    Node* Search(int x) {
+        Node *p = root_;
+        while (p && x != p->x) {
+            if (x < p->x) {
+                p = p->left;
+            } else {
+                p = p->right;
+            }
+        }
+        return p;
+    }
+
+    void Insert(int x) {
+        Node *last = 0;
+        Node *p = root_;
+
+        while (p) {
+            last = p;
+            if (x < p->x) {
+                p = p->left;
+            } else {
+                p = p->right;
+            }
+        }
+
+        Node *inserted = new Node;
+        inserted->x = x;
+        inserted->parent = last;
+        inserted->left = 0;
+        inserted->right = 0;
+        inserted->height = 0;
+
+        if (!last) {
+            root_ = inserted;
+        } else if (inserted->x < last->x) {
+            last->left = inserted;
+        } else {
+            last->right = inserted;
+        }
+        Balance(inserted);
+    }
+
+    void Delete(Node *p) {
+        Node *x = 0;
+        if (!p->left) {
+            x = p->right;
+            Transplant(p, p->right);
+        } else if (!p->right) {
+            x = p->left;
+            Transplant(p, p->left);
+        } else {
+            Node *next = Minimum(p->right);
+            x = next;
+            if (next->parent != p) {
+                Transplant(next, next->right);
+                next->right = p->right;
+                next->right->parent = next;
+            }
+            Transplant(p, next);
+            next->left = p->left;
+            next->left->parent = next;
+        }
+
+        delete p;
+        
+        if (x) {
+            Balance(x);
+        }
+    }
+
+    void Print() {
+        Print(root_);
+    }
+
+private:
+    void Print(Node *p) {
+        if (p) {
+            Print(p->left);
+            cout << p-> x << ' ' << p->height << endl;
+            Print(p->right);
+        }
+    }
+
+    Node *root_; 
+    
+    void Release(Node *p) {
+        if (p) {
+            Release(p->left);
+            Release(p->right);
+            delete p;
+        }
+    }
+
+    Node *Minimum(Node *p) {
+        while (p->left) {
+            p = p->left;
+        }
+        return p;
+    }
+
+    int Height(Node *p) {
+        return p ? p->height : -1;
+    }
+
+    void UpdateLeft(Node *p) {
+        if (!p) return;
+    }
+
+    void LeftRotate(Node *p) {
+        Node *t = p->right;
+
+        // Turn t's left subtree into p's right subtree
+        p->right = t->left;
+        if (t->left) {
+            t->left->parent = p;
+        }
+
+        // Link p's parent to t
+        t->parent = p->parent; 
+        if (!p->parent) {
+            root_ = t;
+        } else if (p == p->parent->left) {
+            p->parent->left = t;
+        } else {
+            p->parent->right = t;
+        }
+
+        // put p on t's left
+        t->left = p;
+        p->parent = t;
+
+        p->height = max(Height(p->left), Height(p->right)) + 1;
+        t->height = max(p->height, Height(t->right)) + 1;
+    }
+
+    // Symmetric
+    void RightRotate(Node *p) {
+        Node *t = p->left;
+
+        p->left = t->right;
+        if (t->right) {
+            t->right->parent = p;
+        }
+
+        t->parent = p->parent; 
+        if (!p->parent) {
+            root_ = t;
+        } else if (p == p->parent->left) {
+            p->parent->left = t;
+        } else {
+            p->parent->right = t;
+        }
+
+        t->right = p;
+        p->parent = t;
+
+        p->height = max(Height(p->left), Height(p->right)) + 1;
+        t->height = max(Height(t->left), p->height) + 1;
+    }
+
+    void Balance(Node *p) {
+        int x = p->x;
+        p = p->parent;
+        while (p) {
+            p->height = max(Height(p->left), Height(p->right)) + 1;
+            if (2 == Height(p->left) - Height(p->right)) {
+                if (x < p->left->x) {
+                    RightRotate(p);
+                } else {
+                    LeftRotate(p->left);
+                    RightRotate(p);
+                }
+                p = p->parent->parent;
+            } else if (-2 == Height(p->left) - Height(p->right)) {
+                if (x > p->right->x) {
+                    LeftRotate(p);
+                } else {
+                    RightRotate(p->right);
+                    LeftRotate(p);
+                }
+                p = p->parent->parent;
+            } else {
+                p = p->parent;
+            }
+        }
+    }
+
+    void Transplant(Node *old, Node *fresh) {
+        if (!old->parent) {
+            root_ = fresh;
+        } else if (old == old->parent->left) {
+            old->parent->left = fresh;
+        } else {
+            old->parent->right = fresh;
+        }
+        if (fresh) {
+            fresh->parent = old->parent;
+        }
+    }
+
+};
+
 int main() {
+    
     RBTree tree;
     tree.Insert(10);
     tree.Insert(32);
@@ -302,6 +523,27 @@ int main() {
     tree.Delete(tree.Search(14));
  
     tree.Print();
+    
+
+    AVLTree avl;
+    avl.Insert(10);
+    avl.Insert(32);
+    avl.Insert(1);
+    avl.Insert(22);
+    avl.Insert(15);
+    avl.Delete(avl.Search(1));
+    avl.Insert(8);
+    avl.Insert(11);
+    avl.Insert(3);
+    avl.Delete(avl.Search(22));
+    avl.Insert(14);
+    avl.Insert(2);
+    avl.Insert(45);
+    avl.Insert(18);
+    avl.Delete(avl.Search(14));
+
+    avl.Print();
+
     return 0;
 }
 
