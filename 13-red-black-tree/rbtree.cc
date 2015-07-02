@@ -1,5 +1,7 @@
 #include <iostream>
 #include <algorithm>
+#include <cassert>
+#include <ctime>
 
 using namespace std;
 
@@ -14,8 +16,9 @@ public:
         Color color;  
     };
 
-    RBTree() : nil_(&sentinel_), root_(nil_) {
+    RBTree() : nil_(&sentinel_), root_(nil_), black_height_(0) {
         sentinel_.parent = sentinel_.left = sentinel_.right = nil_;
+        sentinel_.x = 0;
         sentinel_.color = Color::kBlack;
     }
 
@@ -30,6 +33,32 @@ public:
                 p = p->left;
             } else {
                 p = p->right;
+            }
+        }
+        return p;
+    }
+
+    Node* Debug_Search(int x) {
+        Node *p = root_;
+        while (p && x != p->x) {
+            cout << p->x;
+            if (Color::kRed == p->color) {
+                cout << " Red" << endl;
+            } else {
+                cout << " Black" << endl;
+            }
+            if (x < p->x) {
+                p = p->left;
+            } else {
+                p = p->right;
+            }
+        }
+        if (p) {
+            cout << p->x;
+            if (Color::kRed == p->color) {
+                cout << " Red" << endl;
+            } else {
+                cout << " Black" << endl;
             }
         }
         return p;
@@ -97,21 +126,75 @@ public:
         delete p;
     }
 
+    int black_height() {
+        return black_height_;
+    }
+
+    /*
+    Node *FindMaxSubTree(int black_height) {
+        int current_bh = black_height_;
+        Node *p = root_;
+        while (current_bh > black_height) {
+            p = p->right;
+            if (Color::kBlack == p->color) {
+                --current_bh;
+            }
+        }
+        return p;
+    }
+
+    Node *FindMinSubTree(int black_height) {
+        int current_bh = black_height_;
+        Node *p = root_;
+        while (current_bh > black_height) {
+            p = p->left;
+            if (Color::kBlack == p->color) {
+                --current_bh;
+            }
+        }
+        return p;
+    }
+
+    void Join(RBTree &tree, int x) {
+        assert(black_height_ > tree.black_height_);
+        Node *sub = FindMaxSubTree(tree.black_height_); 
+        if (sub) {
+            Node *joint = new Node;
+            joint->x = x;
+            joint->color = Color::kRed;
+
+            sub->parent->right = joint;
+            joint->parent = sub->parent;
+
+            joint->left = sub;
+            sub->parent = joint;
+
+            joint->right = tree.root_;
+            tree.root_->parent = joint;
+            
+            tree.root_ = tree.nil_;
+            tree.black_height_ = 0;
+
+            InsertFixUp(joint);
+        }
+    }
+    */
+
     void Print() {
-        Print(root_);
+        Print(root_, 0);
     }
 
 private:
-    void Print(Node *p) {
+    void Print(Node *p, int deep) {
         if (nil_ != p) {
-            Print(p->left);
-            cout << p->x;
+            Print(p->left, deep + 1);
+            cout << p->x << ' ' << deep;
             if (Color::kRed == p->color) {
                 cout << " Red" << endl;
             } else {
                 cout << " Black" << endl;
             }
-            Print(p->right);
+            Print(p->right, deep + 1);
         }
     }
 
@@ -207,7 +290,7 @@ private:
                 }
             } else {
                 Node *y = p->parent->parent->left;
-                if (Color::kBlack == y->color) {
+                if (Color::kRed == y->color) {
                     p->parent->color = Color::kBlack;
                     y->color = Color::kBlack;
                     p->parent->parent->color = Color::kRed;
@@ -223,7 +306,10 @@ private:
                 }
             }
         }
-        root_->color = Color::kBlack;
+        if (Color::kRed == root_->color) {
+            root_->color = Color::kBlack;
+            ++black_height_;
+        }
     }
 
     void DeleteFixUp(Node *p) {
@@ -251,6 +337,7 @@ private:
                     w->right->color = Color::kBlack;
                     LeftRotate(p->parent);
                     p = root_;
+                    ++black_height_;
                 }
             } else {
                 // Symmetric
@@ -276,15 +363,18 @@ private:
                     w->left->color = Color::kBlack;
                     RightRotate(p->parent);
                     p = root_;
+                    ++black_height_;
                 }
             }
         }
         root_->color = Color::kBlack;
+        --black_height_;
     }
 
     Node * const nil_;
     Node *root_;
     Node sentinel_;
+    int black_height_;
 };
 
 class AVLTree {
@@ -503,28 +593,211 @@ private:
 
 };
 
+class Treap {
+public:
+    struct Node {
+        int x, priority;
+        Node *left, *right, *parent;
+    };
+
+    Treap() : root_(0) {
+        srand(time(0));
+    }
+
+    ~Treap() {
+        Release(root_);
+    }
+
+    void Insert(int x) {
+        Node *last = 0;
+        Node *p = root_;
+
+        while (p) {
+            last = p;
+            if (x < p->x) {
+                p = p->left;
+            } else {
+                p = p->right;
+            }
+        }
+
+        Node *inserted = new Node;
+        inserted->x = x;
+        inserted->parent = last;
+        inserted->left = 0;
+        inserted->right = 0;
+        inserted->priority = rand();
+
+        if (!last) {
+            root_ = inserted;
+        } else if (inserted->x < last->x) {
+            last->left = inserted;
+        } else {
+            last->right = inserted;
+        }
+
+        Balance(inserted);
+    }
+
+//private:
+    Node *root_;
+
+    void Release(Node *p) {
+        if (p) {
+            Release(p->left);
+            Release(p->right);
+            delete p;
+        }
+    }
+
+    void LeftRotate(Node *p) {
+        Node *t = p->right;
+
+        p->right = t->left;
+        if (t->left) {
+            t->left->parent = p;
+        }
+
+        t->parent = p->parent; 
+        if (!p->parent) {
+            root_ = t;
+        } else if (p == p->parent->left) {
+            p->parent->left = t;
+        } else {
+            p->parent->right = t;
+        }
+
+        t->left = p;
+        p->parent = t;
+    }
+
+    // Symmetric
+    void RightRotate(Node *p) {
+        Node *t = p->left;
+
+        p->left = t->right;
+        if (t->right) {
+            t->right->parent = p;
+        }
+
+        t->parent = p->parent; 
+        if (!p->parent) {
+            root_ = t;
+        } else if (p == p->parent->left) {
+            p->parent->left = t;
+        } else {
+            p->parent->right = t;
+        }
+
+        t->right = p;
+        p->parent = t;
+    }
+
+    void Balance(Node *p) {
+        while (p->parent && p->priority < p->parent->priority) {
+            if (p->x < p->parent->x) {
+                RightRotate(p->parent);
+            } else {
+                LeftRotate(p->parent);
+            }
+        }
+    }
+};
+
+/*
+template<class T>
+T* PersistentInsert(T *root, int x) {
+    if (!root) {
+        T *inserted = new T;
+        inserted->x = x;
+        inserted->left = 0;
+        inserted->right = 0;
+        return inserted;
+    } else {
+        T *new_root = new T;
+        new_root->x = root->x;
+        new_root->left = root->left;
+        new_root->right = root->right;
+
+        if (x < root->x) {
+            new_root->left = PersistentInsert(root->left, x);
+        } else {
+            new_root->right = PersistentInsert(root->right, x);
+        }
+        return new_root;
+    }
+}
+*/
+
+template<class T>
+void PrintTree(T *node, int deep) {
+    if (node) {
+        PrintTree(node->left, deep+1);
+        cout << node->x << ' ' << deep << endl;
+        PrintTree(node->right, deep+1);
+    }
+}
+
+template<class T>
+void DebugPrint(T *node) {
+    if (0 != node->x) {
+        DebugPrint(node->left);
+        cout << node->x << endl;
+        DebugPrint(node->right);
+    }
+}
+
+
 int main() {
     
     RBTree tree;
+    tree.Insert(1);
+    tree.Insert(2);
+    tree.Insert(3);
+    tree.Insert(4);
+    tree.Insert(5);
+    tree.Insert(6);
+    tree.Insert(7);
+    tree.Insert(8);
+    tree.Insert(9);
+    tree.Insert(10);
+    tree.Insert(11);
+    tree.Insert(12);
+ 
+    /*
     tree.Insert(10);
     tree.Insert(32);
     tree.Insert(1);
     tree.Insert(22);
     tree.Insert(15);
-    tree.Delete(tree.Search(1));
+//    tree.Delete(tree.Search(1));
     tree.Insert(8);
     tree.Insert(11);
     tree.Insert(3);
-    tree.Delete(tree.Search(22));
+    //tree.Delete(tree.Search(22));
     tree.Insert(14);
     tree.Insert(2);
     tree.Insert(45);
     tree.Insert(18);
-    tree.Delete(tree.Search(14));
- 
-    tree.Print();
-    
+    //tree.Delete(tree.Search(14));
+    tree.Insert(4);
+    tree.Insert(9);
+    tree.Insert(5);
+    tree.Insert(20);
+    */
 
+    RBTree to_join;
+    to_join.Insert(111);
+    to_join.Insert(100);
+    to_join.Insert(120);
+
+    tree.Print();
+    cout << tree.black_height() << endl;
+    to_join.Print();
+    cout << to_join.black_height() << endl;
+
+    //tree.Join(to_join, 99);
+/*
     AVLTree avl;
     avl.Insert(10);
     avl.Insert(32);
@@ -543,6 +816,32 @@ int main() {
     avl.Delete(avl.Search(14));
 
     avl.Print();
+*/
+
+    /*
+    auto avl_root = avl.Search(11);
+    auto new_root = PersistentInsert(avl_root, 49);
+    cout << endl;
+    PrintTree(avl_root);
+    cout << endl;
+    PrintTree(new_root);
+    cout << endl;
+    */
+
+    Treap treap;
+    treap.Insert(1);
+    treap.Insert(2);
+    treap.Insert(3);
+    treap.Insert(4);
+    treap.Insert(5);
+    treap.Insert(6);
+    treap.Insert(7);
+    treap.Insert(8);
+    treap.Insert(9);
+    treap.Insert(10);
+    treap.Insert(11);
+    treap.Insert(12);
+    PrintTree(treap.root_, 0);
 
     return 0;
 }
