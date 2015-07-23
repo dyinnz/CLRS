@@ -8,7 +8,7 @@ using namespace std;
 
 class BTree {
 public:
-    static const int t = 3;
+    static const int t = 2;
 
     struct Node {
         list<int> keys;
@@ -71,8 +71,8 @@ private:
     }
 
     void Print(Node *x, int deep) {
-        PrintSpace(deep);
-        cout << "size: " << x->n << endl;
+//        PrintSpace(deep);
+//        cout << "size: " << x->n << endl;
         auto iter_key = x->keys.begin();
         auto iter_child = x->children.begin();
 
@@ -274,7 +274,7 @@ private:
 int main() {
 
     BTree bt;
-    for (int i = 1; i <= 30; ++i) {
+    for (int i = 1; i <= 15; ++i) {
         bt.Insert(i);
     }
     bt.Print();
