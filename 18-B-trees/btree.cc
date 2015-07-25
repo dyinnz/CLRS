@@ -219,6 +219,10 @@ private:
                     MergeKeys(iter_child, x->keys, iter_key);
                     MergeChildren(iter_child, x->children);
                     Delete(lc, key);
+                    if (x->keys.empty()) {
+                        root_ = x->children.front();
+                    }
+                    delete x;
                 }
                 return;
             }
@@ -259,6 +263,11 @@ private:
                     MergeKeys(merge_iter, x->keys, merge_key);
                     MergeChildren(merge_iter, x->children);
                     Delete(*merge_iter, key);
+
+                    if (x->keys.empty()) {
+                        root_ = x->children.front();
+                        delete x;
+                    }
                 }
             } else {
                 Delete(*iter_child, key);
