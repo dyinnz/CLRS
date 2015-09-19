@@ -25,7 +25,7 @@ struct Node {
     list<pair<Node*, int>> edges;
 };
 
-vector<Node> ReadGraph(vector<Edge> &edges, size_t vn) {
+vector<Node> ReadGraph(const vector<Edge> &edges, size_t vn) {
     vector<Node> graph(vn);
     for (size_t i = 0; i < vn; ++i) {
         graph[i].index = i;
@@ -48,7 +48,7 @@ void Relax(Node *u, Node *v, int w) {
     }
 }
 
-bool BellmanFord(vector<Node> &graph, vector<Edge> &edges, int s) {
+bool BellmanFord(vector<Node> &graph, const vector<Edge> &edges, int s) {
     assert(!graph.empty());
 
     graph[s].distance = 0;
