@@ -1,0 +1,24 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BellmanFord	sssp.cc	/^bool BellmanFord(vector<Node> &graph, vector<Edge> &edges, int s) {$/;"	f
+CalcDAGPaths	sssp.cc	/^int CalcDAGPaths(vector<Node> &graph, int s) {$/;"	f
+DAGShortestPaths	sssp.cc	/^void DAGShortestPaths(vector<Node> &graph, int s) {$/;"	f
+Edge	sssp.cc	/^struct Edge {$/;"	s	file:
+Node	sssp.cc	/^    Node () : index(0), distance(INT_MAX), parent(nullptr) {}$/;"	f	struct:Node
+Node	sssp.cc	/^struct Node {$/;"	s	file:
+ReadGraph	sssp.cc	/^vector<Node> ReadGraph(vector<Edge> &edges, size_t vn) {$/;"	f
+Relax	sssp.cc	/^void Relax(Node *u, Node *v, int w) {$/;"	f
+TopoDFS	sssp.cc	/^void TopoDFS(Node *pu, vector<Node*> &topo_order) {$/;"	f
+TopoSort	sssp.cc	/^vector<Node*> TopoSort(vector<Node> &graph, int s) {$/;"	f
+distance	sssp.cc	/^    int distance;$/;"	m	struct:Node	file:
+edges	sssp.cc	/^    list<pair<Node*, int>> edges;$/;"	m	struct:Node	file:
+index	sssp.cc	/^    int index;$/;"	m	struct:Node	file:
+main	sssp.cc	/^int main() {$/;"	f
+parent	sssp.cc	/^    Node *parent;$/;"	m	struct:Node	file:
+u	sssp.cc	/^    int u, v, w;$/;"	m	struct:Edge	file:
+v	sssp.cc	/^    int u, v, w;$/;"	m	struct:Edge	file:
+w	sssp.cc	/^    int u, v, w;$/;"	m	struct:Edge	file:

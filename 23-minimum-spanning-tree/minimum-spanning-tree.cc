@@ -85,7 +85,9 @@ vector<pair<int, int>> Prim(const vector<list<ToPoint>> &graph) {
         int u, key, parent;
     };
     auto f = [](Vertex &x, Vertex &y) { return x.key > y.key; };
-    priority_queue<Vertex, vector<Vertex>, function<bool(Vertex&, Vertex&)>> q(f);
+
+    //priority_queue<Vertex, vector<Vertex>, function<bool(Vertex&, Vertex&)>> q(f);
+    priority_queue<Vertex, vector<Vertex>, decltype(f)> q(f);
 
     q.push( {1, 0, 0} );
     
