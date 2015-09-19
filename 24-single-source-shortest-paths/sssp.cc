@@ -14,15 +14,16 @@
 
 using namespace std;
 struct Edge {
+    Edge(int u = 0, int v = 0, int w = 0) : u(u), v(v), w(w) {}
     int u, v, w;
 };
 
 struct Node {
-    Node () : index(0), distance(INT_MAX), parent(nullptr) {}
+    Node (int index = 0) : index(index), distance(INT_MAX), parent(UINT_MAX) {}
     int index;
     int distance;
-    Node *parent;
-    list<pair<Node*, int>> edges;
+    size_t parent;
+    list<pair<size_t, int>> edges;
 };
 
 vector<Node> ReadGraph(const vector<Edge> &edges, size_t vn) {
@@ -33,7 +34,7 @@ vector<Node> ReadGraph(const vector<Edge> &edges, size_t vn) {
 
     for (auto &e : edges) {
         // cout << __func__ << " " << e.u << " " << e.v << endl; 
-        graph[e.u].edges.push_back( {&(graph[e.v]), e.w} );
+        graph[e.u].edges.push_back( {e.v, e.w} );
     }
     return move(graph);
 }
@@ -44,7 +45,7 @@ void Relax(Node *u, Node *v, int w) {
 
     } else if (v->distance > u->distance + w) {
         v->distance = u->distance + w;
-        v->parent = u;
+        v->parent = u->index;
     }
 }
 
@@ -68,13 +69,13 @@ bool BellmanFord(vector<Node> &graph, const vector<Edge> &edges, int s) {
     return true;
 }
 
-void TopoDFS(Node *pu, vector<Node*> &topo_order) {
+void TopoDFS(vector<Node> &graph, Node *pu, vector<Node*> &topo_order) {
     pu->distance = -1;
 
     for (auto &edge : pu->edges) {
-        Node *pv = edge.first;
-        if (-1 != pv->distance) {
-            TopoDFS(pv, topo_order);
+        Node &v = graph[edge.first];
+        if (-1 != v.distance) {
+            TopoDFS(graph, &v, topo_order);
         }
     }
 
@@ -88,7 +89,7 @@ vector<Node*> TopoSort(vector<Node> &graph, int s) {
         node.distance = 0;
     }
 
-    TopoDFS(&graph[s], topo_order);
+    TopoDFS(graph, &graph[s], topo_order);
     
     return move(topo_order);
 }
@@ -107,7 +108,7 @@ void DAGShortestPaths(vector<Node> &graph, int s) {
     for (auto iter = topo_order.rbegin(); iter != topo_order.rend(); ++iter) {
         Node *pu = *iter;
         for (auto &edge : pu->edges) {
-            Relax(pu, edge.first, edge.second);
+            Relax(pu, &graph[edge.first], edge.second);
         }
     }
 }
@@ -126,8 +127,8 @@ int CalcDAGPaths(vector<Node> &graph, int s) {
     for (auto iter = topo_order.rbegin(); iter != topo_order.rend(); ++iter) {
         Node *pu = *iter;
         for (auto &edge : pu->edges) {
-            Node *pv = edge.first;
-            pv->distance += pu->distance;
+            Node &v = graph[edge.first];
+            v.distance += pu->distance;
         }
     }
     
@@ -265,14 +266,80 @@ void Dijkstra(vector<Node> &graph, int s) {
     while (!heap.Empty()) {
         Node *pu = heap.Pop();
         for (auto &edge : pu->edges) {
-            Relax(pu, edge.first, edge.second);
-            heap.Float(heap_pos[edge.first->index]);
+            Relax(pu, &graph[edge.first], edge.second);
+            heap.Float(heap_pos[graph[edge.first].index]);
         }
     }
 
+    /*
     for (auto &node : graph) {
         cout << node.index << " " << node.distance << endl;
     }
+    */
+}
+
+int* Johnson(vector<Node> &graph, vector<Edge> &edges) {
+    size_t vn = graph.size();
+    size_t s_index = vn;
+
+    // add source vertex
+    Node s(s_index);
+    for (size_t i = 0; i < graph.size(); ++i) {
+        edges.push_back(Edge(s_index, i, 0));
+        s.edges.push_back({i, 0});
+    }
+
+    graph.push_back(move(s));
+
+    if (!BellmanFord(graph, edges, s_index)) {
+        cout << "contain negative-weight circle\n" << endl;
+        return nullptr;
+    } 
+
+    // restore the graph
+    graph.pop_back();
+    for (size_t i = 0; i < graph.size(); ++i) {
+        edges.pop_back();
+    }
+    cout << endl;
+
+
+    // construct graph for johnson
+    vector<Node> johnson_graph (graph.size());
+    auto john = johnson_graph.begin();
+    auto origin = graph.begin();
+    while (john != johnson_graph.end() && origin != graph.end()){
+        
+        john->index = origin->index;
+
+        for (auto &edge : origin->edges) {
+            Node *pv = &graph[edge.first];
+            int w = edge.second + origin->distance - pv->distance;
+            john->edges.push_back({pv->index, w});
+        }
+
+        ++john;
+        ++origin;
+    }
+
+    // run vn times Dijkstra
+    int *dist_matrix = new int[vn * vn];
+
+    for (size_t i = 0; i < vn; ++i) {
+        for (auto &node : johnson_graph) {
+            node.distance = INT_MAX;
+            node.parent = UINT_MAX;
+        }
+        
+        Dijkstra(johnson_graph, i);
+
+        for (size_t j = 0; j < vn; ++j) {
+            *(dist_matrix + i*vn + j) = 
+                johnson_graph[j].distance + graph[j].distance - graph[i].distance;
+        }
+    }
+
+    return dist_matrix;
 }
 
 int main() {
@@ -342,6 +409,33 @@ int main() {
     auto dij_graph = ReadGraph(dij_edges, 5);
     Dijkstra(dij_graph, 0);
 
+    /******************************************************************************/
+    vector<Edge> johnson_edges {
+        {0, 1, 6},
+        {0, 3, 7},
+        {1, 2, 5},
+        {1, 3, 8},
+        {1, 4, -4},
+        {2, 1, -2},
+        {3, 2, -3},
+        {3, 4, 9},
+        {4, 2, 7},
+        {4, 0, 2},
+    };
+    auto johnson_graph = ReadGraph(johnson_edges, 5);
+
+ 
+
+
+    int *dist_matrix = Johnson(johnson_graph, johnson_edges);
+    cout << "Distance matrix:" << endl;
+    for (int i = 0; i < 5; ++i) {
+        for (int j = 0; j < 5;  ++j) {
+            cout << *(dist_matrix + i * 5 + j) << '\t';
+        }
+        cout << endl;
+    }
+    cout << endl;
 
     return 0;
 }

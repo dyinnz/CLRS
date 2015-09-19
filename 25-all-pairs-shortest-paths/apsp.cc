@@ -23,8 +23,10 @@ public:
     MatrixGraph(const size_t vn) : _vn(vn) {
         _weights = new int[_vn * _vn];
         _distances = new int[_vn * _vn];
+        _parents = new size_t[_vn * _vn];
 
         memset(_weights, 0, sizeof(int) * _vn * _vn);
+        memset(_parents, -1, sizeof(size_t) * _vn * _vn);
 
         for (size_t i = 0; i < _vn; ++i) {
             for (size_t j = 0; j < _vn; ++j) {
@@ -37,6 +39,7 @@ public:
         for (auto &edge : edges) {
             SetWeight(edge.u, edge.v, edge.w);
             SetDistance(edge.u, edge.v, edge.w);
+            SetParent(edge.u, edge.v, edge.u);
         }
 
         for (size_t i = 0; i < _vn; ++i) {
@@ -53,13 +56,16 @@ public:
         return *(_distances + x*_vn + y);
     }
 
+    size_t GetParent(size_t x, size_t y) const {
+        return *(_parents + x*_vn + y);
+    }
+
     size_t GetSize() const {
         return _vn;
     }
 
     void FloydWarshall() {
         for (size_t k = 0; k < _vn; ++k) {
-            DebugPrint();
         for (size_t i = 0; i < _vn; ++i) {
         for (size_t j = 0; j < _vn; ++j) {
 
@@ -71,14 +77,16 @@ public:
 
                 int dist = GetDistance(i, k) + GetDistance(k, j);
                 SetDistance(i, j, dist);
+                SetParent(i, j, GetParent(k, j));
             }
 
         } } }
 
-        DebugPrint();
+        DebugDistances();
+        DebugParents();
     }
 
-    void DebugPrint() const {
+    void DebugDistances() {
         cout << "Distance Matrix:" << endl;
         for (size_t i = 0; i < _vn; ++i) {
             for (size_t j = 0; j < _vn; ++j) {
@@ -93,11 +101,27 @@ public:
         }
         cout << endl;
     }
+
+    void DebugParents() {
+        cout << "Parents Matrix:" << endl;
+        for (size_t i = 0; i < _vn; ++i) {
+            for (size_t j = 0; j < _vn; ++j) {
+                if (UINT_MAX == GetParent(i, j)) {
+                    cout << "X\t";
+                } else {
+                    cout << GetParent(i, j) << '\t';
+                }
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
     
 private:
     size_t _vn;
     int *_weights;
     int *_distances;
+    size_t *_parents;
 
     void SetWeight(size_t x, size_t y, int w) {
         *(_weights + x*_vn + y) = w;
@@ -105,6 +129,10 @@ private:
 
     void SetDistance(size_t x, size_t y, int d) {
         *(_distances + x*_vn + y) = d;
+    }
+
+    void SetParent(size_t x, size_t y, size_t p) {
+        *(_parents + x*_vn + y) = p;
     }
 };
 
