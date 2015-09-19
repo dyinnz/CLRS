@@ -10,6 +10,7 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <functional>
 
 using namespace std;
 struct Edge {
@@ -144,19 +145,133 @@ int CalcDAGPaths(vector<Node> &graph, int s) {
 
 /******************************************************************************/
 
-#define left_child(x) ((x) << 1)
-#define right_child(x) (((x) << 1) + 1)
-#define parent(x) (x >> 1)
+/* default for max heap */
+template<class T, class PositionSetter, class Compare = less<T>>
+class Heap {
+public:
+    Heap(const PositionSetter &set_pos = PositionSetter(), const Compare &cmp = Compare())
+        : _set_pos(set_pos), _cmp(cmp) {
+        _data.push_back(T());
+        //CorrectPosition(0);
+    }
 
-void MinHeapify(vector<Node*> &A, size_t pos) {
-    size_t left = left_child(pos);
-    size_t right = right_child(pos);
+    bool Empty() const {
+        return 1 == _data.size();
+    }
 
-    size_t minpos {-1};
-    if (left < A.size() && A[left] > A[pos]) {
-        maxpos = left;
-    } else {
-        maxpos = pos;
+    const T& Top() const {
+        assert(!Empty());
+        return _data[1];
+    }
+
+    T Pop() {
+        assert(!Empty());
+
+        swap(_data[1], _data.back());
+        CorrectPosition(1);
+
+        T temp = _data.back();
+        _data.pop_back();
+
+        MaxHeapify(1);
+
+        return move(temp);
+    }
+
+    void Push(const T &key) {
+        _data.push_back(key);
+        Float(_data.size()-1);
+    }
+
+    void Push(T &&key) {
+        _data.push_back(key);
+        Float(_data.size()-1);
+    }
+
+    void IncreaseKey(size_t pos, const T &key) {
+        if (_cmp(_data[pos], key)) {
+            _data[pos] = key;
+            Float(pos);
+        }
+    }
+
+    void IncreaseKey(size_t pos, function<void(T &key)> change) {
+        change(_data[pos]);
+        Float(pos);
+    }
+
+    void Float(size_t pos) {
+        while (parent(pos) > 0 && _cmp(_data[parent(pos)], _data[pos])) {
+            swap(_data[parent(pos)], _data[pos]);
+            CorrectPosition(pos);
+            pos = parent(pos);
+        }
+        CorrectPosition(pos);
+    }
+
+    vector<T>& DebugGetData() {
+        return _data;
+    }
+
+private:
+    vector<T> _data;
+    const PositionSetter _set_pos;
+    const Compare _cmp;
+
+    void MaxHeapify(const size_t pos) {
+        size_t left = left_child(pos);
+        size_t right = right_child(pos);
+
+        size_t maxpos {pos};
+        if (0 < left && left < _data.size() && _cmp(_data[maxpos], _data[left])) {
+            maxpos = left;
+        }
+        if (0 < right && right < _data.size() && _cmp(_data[maxpos], _data[right])) {
+            maxpos = right;
+        }
+        if (maxpos != pos) {
+            swap(_data[pos], _data[maxpos]);
+            MaxHeapify(maxpos);
+        }
+    }
+
+    void CorrectPosition(const size_t pos) {
+        _set_pos(_data[pos], pos);
+    }
+
+    static size_t left_child(size_t x) { return x << 1; }
+    static size_t right_child(size_t x) { return (x << 1) + 1; }
+    static size_t parent(size_t x) { return x >> 1; }
+};
+
+void Dijkstra(vector<Node> &graph, int s) {
+    vector<int> heap_pos(graph.size());
+    auto set_pos = [&](Node *x, size_t pos) { heap_pos[x->index] = pos; };
+
+    auto cmp = [](Node *x, Node *y) { return x->distance > y->distance; };
+
+    Heap<Node*, function<void(Node*, size_t)>, function<bool(Node *x, Node *y)>>
+        heap(set_pos, cmp);
+
+    for (auto &node : graph) {
+        node.distance = INT_MAX;
+    }
+    graph[s].distance = 0;
+
+    for (auto &node : graph) {
+        heap.Push(&node);
+    }
+
+    while (!heap.Empty()) {
+        Node *pu = heap.Pop();
+        for (auto &edge : pu->edges) {
+            Relax(pu, edge.first, edge.second);
+            heap.Float(heap_pos[edge.first->index]);
+        }
+    }
+
+    for (auto &node : graph) {
+        cout << node.index << " " << node.distance << endl;
     }
 }
 
@@ -197,16 +312,36 @@ int main() {
         {4, 5, -2},
     };
 
+    /******************************************************************************/
+
     auto dag_graph = ReadGraph(dag_edges, 6); 
     auto topo_order = TopoSort(dag_graph, 0);
     DAGShortestPaths(dag_graph, 1);
-    cout << endl;
     for (auto p : topo_order) {
         //cout << p->index << endl;
         cout << p->index << " " << p->distance << endl;
     }
 
     cout << CalcDAGPaths(dag_graph, 0) << endl;
+
+    cout << endl;
+
+    /******************************************************************************/
+    vector<Edge> dij_edges {
+        {0, 1, 10},
+        {0, 3, 5},
+        {1, 2, 1},
+        {1, 3, 2},
+        {2, 4, 4},
+        {3, 1, 3},
+        {3, 2, 9},
+        {3, 4, 2},
+        {4, 2, 6},
+        {4, 0, 3},
+    };
+    auto dij_graph = ReadGraph(dij_edges, 5);
+    Dijkstra(dij_graph, 0);
+
 
     return 0;
 }
