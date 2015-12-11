@@ -5,6 +5,7 @@
  * Date:   2015-12-09
  ******************************************************************************/
 #include <iostream>
+#include <algorithm>
 #include <array>
 #include <vector>
 
@@ -76,9 +77,12 @@ template<int Bsize, int Nsize> class SlackFormBuilder;
 template<int Bsize, int Nsize> 
 class SlackForm {
   private:
+    array<int, Bsize> B;
+    array<int, Nsize> N;
     array<float, Bsize> b;
     array<float, Nsize> c;
     Matrix<Bsize, Nsize> A;
+    array<float, Nsize> answer;
     float v {0};
 
     friend class SlackFormBuilder<Bsize, Nsize>;
@@ -118,14 +122,35 @@ class SlackForm {
       c = newc;
     }
 
+    bool InitializeSimplex() {
+      if (all_of(b.begin(), b.end(), [](int n) {
+            return n >= 0;
+            })) {
+
+        for (int i = 0; i < Nsize; ++i) {
+          N[i] = i;
+        }
+        for (int i = 0; i < Bsize; ++i) {
+          B[i] = Nsize + i;
+        }
+        return true;
+      }
+
+      // TODO: corroect this function soon
+      return false;
+    }
+
     bool Simplex() {
-      for (;;) {
+      if (bool
+
+       for (;;) {
         int enter = -1;
         for (int i = 0; i < Nsize; ++i) if (c[i] > 0) {
           enter = i;
         }
         if (-1 == enter) break;
 
+        // choose the min_index as leave varible
         float min_delta = 10e11;
         int min_index = -1;
         for (int i = 0; i < Bsize; ++i) if (A[i][enter] > 0) {
@@ -138,8 +163,34 @@ class SlackForm {
         if (-1 == min_index) {
           return false;
         }
+        swap(B[min_index], N[enter]);
         Pivot(min_index, enter);
       }
+
+      // set the answer
+      for (int i = 0; i < Bsize; ++i) if (B[i] < Nsize) {
+        answer[B[i]] = b[i];
+      }
+
+      DebugDisplay();
+
+      cout << "basic variable" << endl;
+      for (int basic : B) {
+        cout << basic << ' ';
+      }
+      cout << endl;
+      cout << "nonbasic variable" << endl;
+      for (int nonbasic : N) {
+        cout << nonbasic << ' ';
+      }
+      cout << endl;
+
+      cout << "answer" << endl;
+      for (int a : answer) {
+        cout << a << " ";
+      }
+      cout << endl;
+
       return true;
     }
 
@@ -205,8 +256,6 @@ void TestPivot() {
                 .set_v(0)
                 .set_A(Matrix<3, 3>(A_ary))
                 .slack();
-  slack->DebugDisplay();
-  slack->Pivot(2, 0);
   slack->DebugDisplay();
   slack->Simplex();
   cout << slack->max_value() << endl;
