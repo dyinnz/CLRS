@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <complex>
+#include <cassert>
 
 using namespace std;
 
@@ -119,6 +120,13 @@ ostream& operator<<(ostream &out, const Fraction &rhs) {
   return out;
 }
 
+void DisplayPolynomials(const vector<complex<float>> &A) {
+  for (auto &c : A) {
+    cout << c << ' ';
+  }
+  cout << endl;
+}
+
 vector<complex<float>> RecursiveFFT(const vector<complex<float>> &A) {
   size_t n = A.size();
   if (1 == A.size()) {
@@ -141,12 +149,66 @@ vector<complex<float>> RecursiveFFT(const vector<complex<float>> &A) {
   complex<float> wn(0.0, M_PI * 2.0 / n);
   wn = exp(wn);
   complex<float> w(1.0, 0.0);
-  for (int k = 0; k <= n/2 - 1; ++k) {
+  for (int k = 0; k < n/2; ++k) {
     Y[k] = Y0[k] + w * Y1[k];
     Y[k + n/2] = Y0[k] - w * Y1[k];
     w *= wn;
   }
   return Y;
+}
+
+void BitReverseCopy(const vector<complex<float>> &former, 
+                    vector<complex<float>> &latter,
+                    const vector<int> &rev) {
+  assert(former.size() == latter.size());
+  for (int k = 0; k < former.size(); ++k) {
+    latter[rev[k]] = former[k];
+  }
+}
+
+vector<int> ComputeReverseBit(size_t s) {
+  size_t n = 1 << s;
+  auto compute = [=] (int k) { 
+    int result = 0;
+    for (size_t i = 0; i < s; ++i) {
+      result |= ((k >> i) & 1) << (s - i - 1);
+    }
+    return result;
+  };
+
+  vector<int> rev(n);
+  for (int i = 0; i < int(n); ++i) {
+    rev[i] = compute(i); 
+  }
+  return rev;
+}
+
+vector<complex<float>> IterativeFFT(vector<complex<float>> &former) {
+  int s = 0;
+  for (int i = 31; i >= 0; --i) if ((former.size() >> i) & 1) {
+    s = i;
+    break;
+  }
+  vector<int> rev = ComputeReverseBit(s);
+  vector<complex<float>> latter(former.size());
+  BitReverseCopy(former, latter, rev);
+
+  for (int i = 1; i <= s; ++i) {
+    int m = 1 << i;
+    complex<float> wn(0.0, M_PI * 2.0 / m);
+    wn = exp(wn);
+    for (int k = 0; k < int(latter.size()); k += m) {
+      complex<float> w(1.0, 0.0);
+      for (int j = 0; j < m/2; ++j) {
+        auto t = w * latter[k + j + m/2];
+        auto u = latter[k + j];
+        latter[k + j] = u + t;
+        latter[k + j + m/2] =u - t;
+        w *= wn;
+      }
+    }
+  }
+  return latter;
 }
 
 vector<complex<float>> DoInverseDFT(const vector<complex<float>> &A) {
@@ -183,14 +245,15 @@ vector<complex<float>> InverseDFT(const vector<complex<float>> &A) {
   auto Y = DoInverseDFT(A);
   for (auto &c : Y) {
     c /= float(Y.size());
-    if (abs(c.imag()) < 1e-7) {
+    if (abs(c.imag()) < 1e-5) {
       c = complex<float>(c.real(), 0);
     }
   }
   return Y;
 }
 
-vector<complex<float>> MulFunction(const vector<complex<float>> &lhs, const vector<complex<float>> &rhs) {
+vector<complex<float>> MulFunction(const vector<complex<float>> &lhs, 
+                                   const vector<complex<float>> &rhs) {
   vector<complex<float>> result(lhs.size() + rhs.size() - 1);
   for (size_t i = 0; i < lhs.size(); ++i) {
     for (size_t j = 0; j < rhs.size(); ++j) {
@@ -200,24 +263,52 @@ vector<complex<float>> MulFunction(const vector<complex<float>> &lhs, const vect
   return result;
 }
 
-vector<complex<float>> MulPoints(const vector<complex<float>> &lhs, const vector<complex<float>> &rhs) {
+vector<complex<float>> MulCorrespondPoints(const vector<complex<float>> &lhs, 
+                                 const vector<complex<float>> &rhs) {
+  if (lhs.size() < rhs.size()) {
+    return MulCorrespondPoints(rhs, lhs);
+  }
+  vector<complex<float>> result(lhs);
+  for (size_t i = 0; i < rhs.size(); ++i) {
+    result[i] *= rhs[i];
+  }
+  return result;
 }
 
-void DisplayPolynomials(const vector<complex<float>> &A) {
-  for (auto &c : A) {
-    cout << c << ' ';
+vector<complex<float>> MulPolyPoints(const vector<complex<float>> &lhs,
+                                     const vector<complex<float>> &rhs) {
+  if (lhs.size() < rhs.size()) {
+    return MulPolyPoints(rhs, lhs);
   }
-  cout << endl;
+
+  size_t size = lhs.size() * 2;
+  vector<complex<float>> ex_lhs(size), ex_rhs(size);
+  copy(lhs.begin(), lhs.end(), ex_lhs.begin());
+  copy(rhs.begin(), rhs.end(), ex_rhs.begin());
+  auto fft_lhs = RecursiveFFT(ex_lhs);
+  auto fft_rhs = RecursiveFFT(ex_rhs);
+  auto result = InverseDFT(MulCorrespondPoints(fft_lhs, fft_rhs));
+  result.pop_back();
+  return result;
 }
 
 int main() {
   vector<complex<float>> A1 { {1, 0}, {2, 0}, {3, 0}, {4, 0} };
-  vector<complex<float>> A2 { {4, 0}, {3, 0}, {2, 0}, {1, 0} };
+  vector<complex<float>> A2 { {1, 0}, {2, 0}, {3, 0}, {4, 0} };
   DisplayPolynomials(MulFunction(A1, A2));
+  DisplayPolynomials(MulCorrespondPoints(A1, A2));
+  DisplayPolynomials(MulPolyPoints(A1, A2));
+
+  auto rev = ComputeReverseBit(2);
+  for (auto r : rev) {
+    cout << r << ' ';
+  }
+  cout << endl;
+
+  DisplayPolynomials(RecursiveFFT(A1));
+  DisplayPolynomials(IterativeFFT(A1));
+
   return 0;
 }
-
-
-
 
 
