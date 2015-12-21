@@ -5,6 +5,7 @@
  * Date:   2015-12-11
  ******************************************************************************/
 
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 #include <tuple>
@@ -44,7 +45,7 @@ int ModularExponentiation(int a, int b, int n) {
   int c = 0;
   int d = 1;
   int k = 0;
-  for (int i = 31; i > 0; ++i) if (b >> i) {
+  for (int i = 31; i > 0; --i) if (b >> i) {
     k = i;
     break;
   }
@@ -59,6 +60,35 @@ int ModularExponentiation(int a, int b, int n) {
   return d;
 }
 
+bool Witness(int a, int n) {
+  int u = n-1;
+  int t = 0;
+  while (0 == (u & 1)) {
+    u /= 2;
+    t += 1;
+  }
+  int last_x = ModularExponentiation(a, u, n);
+  int x = 0;
+  for (int i = 1; i <= t; ++i) {
+    x = last_x*last_x % n;
+    if (1 == x && 1 != last_x && n-1 != last_x) {
+      return true;
+    }
+    last_x = x;
+  }
+  return 1 != last_x;
+}
+
+bool MillerRabin(int n, int s) {
+  for (int j = 0; j < s; ++j) {
+    int a = rand() % (n-1) + 1;
+    if (Witness(a, n)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 int main() {
   cout << gcd(15, 20) << endl;
   int d, x, y;
@@ -67,6 +97,11 @@ int main() {
        << x << ' '
        << y << endl;
   cout << ModularLinearEquationSolver(14, 30, 100) << endl;
+
+  for (int i = 3; i < 30; i +=2) {
+    cout << i << "\n" << MillerRabin(i, 5) << endl;
+  }
+  cout << endl;
   return 0;
 }
 
