@@ -147,21 +147,34 @@ void MatchJugs(vector<int> &red, vector<int> &blue) {
 
 int main() {
     srand(time(NULL));
-    vector<int> A(100);
-    generate(A.begin(), A.end(), [](){ return (rand()&0xffffffff); });
+    vector<int> A(30);
+
+    generate(A.begin(), A.end(), [](){ return (rand()%100); });
+    for (int num : A) {
+        cout << num << ' ';
+    }
+    cout << endl;
     //auto B = CountintSort(A, 0xffffffff);
     RadixSort(A, 0xffffffff, 8);
     for (int num : A) {
-        cout << num << endl;
+        cout << num << ' ';
     }
+    cout << endl;
 
-    vector<float> B(100);
+    vector<float> B(30);
+
     generate(B.begin(), B.end(), [](){ return rand() / float(RAND_MAX); } );
+    for (float num : B) {
+        cout << num << ' ';
+    }
+    cout << endl;
     BucketSort(B);
     for (float num : B) {
         cout << num << endl;
     }
+    cout << endl;
 
+    /*
     vector<int> C(30);
     generate(C.begin(), C.end(), [](){ return (rand()&0xffff); });
     vector<int> D(C);
@@ -172,6 +185,7 @@ int main() {
         cout << num << " ";
     }
     cout << endl;
+    */
 
     return 0;
 }

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <climits>
 using namespace std;
 
 /* A hacking way to store heap-size is using the A[0] to store it,
@@ -209,16 +210,29 @@ bool TableSearch(Matrix &M, int key) {
 /******************************************************************************/
 
 int main() {
-    /*
-    auto A = GeneratorAarray(100);
+    auto A = GeneratorAarray(30);
+
+    for (auto num : A) {
+      cout << num << ' ';
+    }
+    cout << endl;
+
     BuildMapHeap(A);
-    cout << IsMaxHeap(A, A.size()) << endl;
-    // HeapSort(A);
+    // cout << IsMaxHeap(A, A.size()) << endl;
+    HeapSort(A);
     
+    for (auto num : A) {
+      cout << num << ' ';
+    }
+    cout << endl;
+
+    /*
     while (!A.empty()) {
         cout << HeapExtractMax(A) << endl;
     }
     */
+    
+  /*
     vector<int> A;
     A.clear();
     cout << A.size() << endl;
@@ -243,6 +257,7 @@ int main() {
                 { 8, 9, 10, 11, 15},
                 { 10, 11, 14, 16, 17},
                 { 12, 14, 15, 17, 18} };
+                */
 
     /*
     for (int i = 0; i < 25; ++i) {
@@ -257,8 +272,10 @@ int main() {
     }
     */
 
+    /*
     cout << endl;
     cout << TableSearch(M, 18) << endl;
+    */
 
     /*
     TableInsert(M, 0, 0, 9);

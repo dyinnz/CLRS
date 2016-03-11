@@ -139,12 +139,22 @@ void FuzzySortIntervals(vector<pair<int, int>> &A) {
 }
 
 int main() {
-    auto A = GeneratorAarray(100);
+    auto A = GeneratorAarray(30);
     //vector<int> A;
     srand(time(NULL));
     //generate_n(back_inserter(A), 100, [](){ return (rand()&0xf);} );
-    //QuickSort(A, 0, A.size()-1);
+    for (auto num : A) {
+      cout << num << ' ';
+    }
+    cout << endl;
+    QuickSort(A, 0, A.size()-1);
+    for (auto num : A) {
+      cout << num << ' ';
+    }
+    cout << endl;
     //QuickSortEqual(A, 0, A.size()-1);
+    
+    /*
     TailRecursiveQuickSort(A, 0, A.size()-1);
     for (int num : A) {
         cout << num << endl;
@@ -161,6 +171,7 @@ int main() {
     for (auto p : I) {
         cout << p.first << '\t' << p.second << endl;
     }
+    */
 
     return 0;
 }

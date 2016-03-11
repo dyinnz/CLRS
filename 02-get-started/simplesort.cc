@@ -8,15 +8,15 @@ using namespace std;
 vector<int> GenerateArray(int n) {
     srand(time(NULL)); 
     vector<int> ret(n);
-    generate(ret.begin(), ret.end(), [](){ return rand();} );
+    generate(ret.begin(), ret.end(), [](){ return rand() % 1000;} );
     return move(ret);
 }
 
 void InsertionSort(vector<int> &A, int left, int right) {
-    for (int i = left; i < right; ++i) {
+    for (int i = left+1; i < right; ++i) {
         int key = A[i];
         int j = i - 1;
-        while (j > left && A[j] > key) {
+        while (j > left-1 && A[j] > key) {
             A[j+1] = A[j];
             --j;
         }
@@ -70,15 +70,32 @@ int main() {
         auto nums = GenerateArray(size);
 
         auto copied = nums;
+
+        for (auto num : copied) {
+          printf("%d  ", num);
+        }
+        printf("\n");
+
         auto curr_time = clock();
         MergeSort(copied, 0, copied.size());
         printf("cost time: %f\n", float(clock() - curr_time) / CLOCKS_PER_SEC);
 
+        for (auto num : copied) {
+          printf("%d  ", num);
+        }
+        printf("\n");
+
         copied = nums; 
         curr_time = clock();
-        MergeSortMix(copied, 0, copied.size());
+        InsertionSort(copied, 0, copied.size());
         printf("cost time: %f\n", float(clock() - curr_time) / CLOCKS_PER_SEC);
 
+        for (auto num : copied) {
+          printf("%d  ", num);
+        }
+        printf("\n");
+
+        /*
         copied = nums;
         curr_time = clock();
         sort(copied.begin(), copied.end());
@@ -88,6 +105,7 @@ int main() {
         curr_time = clock();
         stable_sort(copied.begin(), copied.end());
         printf("cost time: %f\n", float(clock() - curr_time) / CLOCKS_PER_SEC);
+        */
     }
     return 0;
 }
