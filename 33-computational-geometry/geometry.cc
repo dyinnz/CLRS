@@ -148,7 +148,80 @@ bool AnySegmentsIntersect(vector<Segment> &S) {
   return false;
 }
 
+struct Point {
+  float x, y;
+};
+
+float distance(Point &lhs, Point &rhs) {
+  return sqrt( (lhs.x-rhs.x)*(lhs.x-rhs.x) + (lhs.y-rhs.y)*(lhs.y-rhs.y) );
+}
+
+float ClosestPairPoints(vector<Point> &X, vector<Point> &Y) {
+  cout << "X: ";
+  for (auto p : X) {
+    cout << "(" << p.x << "," << p.y << ") ";
+  }
+  cout << endl;
+  cout << "Y: ";
+  for (auto p : Y) {
+    cout << "(" << p.x << "," << p.y << ") ";
+  }
+  cout << endl;
+  cout << endl;
+
+  if (X.size() <= 1) {
+    return 10e10;
+
+  } else if (X.size() == 2) {
+    return distance(X[0], X[1]);
+
+  } else if (X.size() <= 3) {
+    return min(distance(X[0], X[1]), min(distance(X[0], X[2]), distance(X[0], X[2])));
+
+  } else {
+    int half = X.size() / 2;
+    float vertical = X[half].x;
+
+    vector<Point> XL(X.begin(), X.begin()+half);
+    vector<Point> XR(X.begin()+half, X.end());
+    vector<Point> YL, YR;
+    for (auto &p : Y) {
+      if (p.x < vertical) {
+        YL.push_back(p);
+      } else { 
+        YR.push_back(p);
+      }
+    }
+
+    float left_d = ClosestPairPoints(XL, YL);
+    float right_d = ClosestPairPoints(XR, YR);
+    float current = min(left_d, right_d);
+
+    auto judge = [&](float x) {
+      return (vertical-current <= x && x <= vertical+current);
+    };
+
+    for (int i = 0; i < Y.size(); ++i) if (judge(Y[i].x)) {
+      int j = i + 1;
+      int cnt = 0;
+      while (cnt < 7 && j < Y.size()) if (judge(Y[i].x)) {
+        if (distance(Y[i], Y[j]) < current) {
+          current = distance(Y[i], Y[j]);
+        }
+        ++cnt; ++j;
+      }
+    }
+
+    cout << "left_d: " << left_d << endl; 
+    cout << "right_d: " << right_d << endl; 
+    cout << "vertical: " << vertical << endl;
+    cout << "current: " << current << endl;
+    return current;
+  }
+}
+
 int main() {
+  /*
   Vector p1(1, 1);
   Vector p2(0, 0);
   Vector p3(1, 0);
@@ -157,5 +230,9 @@ int main() {
   cout << direction(p1, p2, p3) << endl;
   cout << SegmentsIntersect(p1, p2, p3, p4) << endl;
   cout << SegmentsIntersect(p1, p3, p2, p4) << endl;
+  */
+  vector<Point> X { {1,0}, {2,2}, {3,0}, {4,1}, {6,0}, {7,2}, {8,0} };
+  vector<Point> Y { {1,0}, {3,0}, {6,0}, {8,0}, {4,1}, {2,2}, {7,2} };
+  cout << ClosestPairPoints(X, Y) << endl;
   return 0;
 }

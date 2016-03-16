@@ -1,2 +1,6 @@
-main: maxsubarray.cc
-	g++ maxsubarray.cc -o maxsubarray -std=c++11 -O2
+name	=	divide-and-conquer
+CC		=	g++
+FLAGS	=	-std=c++11 -g
+
+${name}: ${name}.cc
+	g++ $< -o $@  ${FLAGS}
