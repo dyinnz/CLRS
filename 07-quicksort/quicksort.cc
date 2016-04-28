@@ -5,111 +5,111 @@
 using namespace std;
 
 vector<int> GeneratorAarray(int n) {
-    srand(time(NULL)); 
-    vector<int> ret(n);
-    generate(ret.begin(), ret.end(), [](){ return (rand()&0xff)-0x7f;} );
-    return move(ret);
+  srand(time(NULL)); 
+  vector<int> ret(n);
+  generate(ret.begin(), ret.end(), [](){ return (rand()&0xff)-0x7f;} );
+  return move(ret);
 }
 
 int Partition(vector<int> &A, int l, int r) {
-    int x = A[r];
-    int i = l - 1;
-    for (int j = l; j < r; ++j) {
-        if (A[j] <= x) {
-            swap(A[++i], A[j]);
-        }
+  int x = A[r];
+  int i = l - 1;
+  for (int j = l; j < r; ++j) {
+    if (A[j] <= x) {
+      swap(A[++i], A[j]);
     }
-    swap(A[++i], A[r]);
-    return i;
+  }
+  swap(A[++i], A[r]);
+  return i;
 }
 
 int RandomizedParition(vector<int> &A, int l, int r) {
-    int p = rand()%(r-l) + l;
-    swap(A[r], A[p]);
-    return Partition(A, l, r);
+  int p = rand()%(r-l) + l;
+  swap(A[r], A[p]);
+  return Partition(A, l, r);
 }
 
 pair<int, int> PartitionEqual(vector<int> &A, int l, int r) {
-    int x = A[r];
-    int i = l - 1, j = r + 1;
-    int k = l;
-    while (k < j) {
-        if (A[k] < x) {
-            swap(A[++i], A[k]);
-            ++k;
-        } else if (A[k] > x) {
-            swap(A[--j], A[k]);
-        } else {
-            ++k;
-        }
+  int x = A[r];
+  int i = l - 1, j = r + 1;
+  int k = l;
+  while (k < j) {
+    if (A[k] < x) {
+      swap(A[++i], A[k]);
+      ++k;
+    } else if (A[k] > x) {
+      swap(A[--j], A[k]);
+    } else {
+      ++k;
     }
-    return {i, j};
+  }
+  return {i, j};
 }
 
 pair<int, int> RandomizedParitionEqual(vector<int> &A, int l, int r) {
-    int p = rand()%(r-l) + l; 
-    swap(A[r], A[p]);
-    return PartitionEqual(A, l, r);
+  int p = rand()%(r-l) + l; 
+  swap(A[r], A[p]);
+  return PartitionEqual(A, l, r);
 }
 
 void QuickSort(vector<int> &A, int l, int r) {
-    if (l < r) {
-        // size_t q = Partition(A, l, r);
-        int q = RandomizedParition(A, l, r);
-        QuickSort(A, l, q-1);
-        QuickSort(A, q+1, r);
-    }
+  if (l < r) {
+    // size_t q = Partition(A, l, r);
+    int q = RandomizedParition(A, l, r);
+    QuickSort(A, l, q-1);
+    QuickSort(A, q+1, r);
+  }
 }
 
 void QuickSortHoare(vector<int> &A, int l, int r) {
-    if (l >= r) return;
-    int x = A[r];
-    int i = l - 1;
-    int j = r + 1;
-    while (true) {
-        while (A[++i] < x) {}
-        while (A[--j] > x) {}
+  if (l >= r) return;
+  int x = A[r];
+  int i = l - 1;
+  int j = r + 1;
+  while (true) {
+    while (A[++i] < x) {}
+    while (A[--j] > x) {}
 
-        if (i < j) {
-            swap(A[i], A[j]);
-        } else {
-            break;
-        }
+    if (i < j) {
+      swap(A[i], A[j]);
+    } else {
+      break;
     }
-    QuickSortHoare(A, l, j-1);
-    QuickSortHoare(A, j, r);
+  }
+  QuickSortHoare(A, l, j-1);
+  QuickSortHoare(A, j, r);
 
-    /* Consider the i == j, and let p = i. If choose A[r] as pilvot,
-     * the recursion call should use p-1 and p. And if choose A[l] as
-     * pilvot, the recursion should use p and p+1.
-     */
+  /* Consider the i == j, and let p = i. If choose A[r] as pilvot,
+   * the recursion call should use p-1 and p. And if choose A[l] as
+   * pilvot, the recursion should use p and p+1.
+   */
 }
 
 void QuickSortEqual(vector<int> &A, int l, int r) {
-    if (l < r) {
-        auto p = PartitionEqual(A, l, r);
-        QuickSortEqual(A, l, p.first);
-        QuickSortEqual(A, p.second, r);
-    }
+  if (l < r) {
+    auto p = PartitionEqual(A, l, r);
+    QuickSortEqual(A, l, p.first);
+    QuickSortEqual(A, p.second, r);
+  }
 }
 
 void TailRecursiveQuickSort(vector<int> &A, int l, int r) {
-    while (l < r) {
-        int q = Partition(A, l, r);
-        if (q-l <= r-q) {
-            TailRecursiveQuickSort(A, l, q-1);
-            l = q + 1;
-        } else {
-            TailRecursiveQuickSort(A, q+1, r);
-            r = q - 1;
-        }
+  while (l < r) {
+    int q = Partition(A, l, r);
+    if (q-l <= r-q) {
+      TailRecursiveQuickSort(A, l, q-1);
+      l = q + 1;
+    } else {
+      TailRecursiveQuickSort(A, q+1, r);
+      r = q - 1;
     }
+  }
 }
 
 void FuzzySortRecursion(vector<pair<int, int>> &A, int l, int r, int limit) {
-    if (l < r) {
-        int i = l-1;
-        int j = r;
+  if (l < r) {
+    int i = l-1;
+    int j = r;
         int k = l;
         int maxr = limit;
         auto x = A[r];

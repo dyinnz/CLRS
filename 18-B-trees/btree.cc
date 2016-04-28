@@ -7,109 +7,109 @@
 using namespace std;
 
 class BTree {
-public:
+  public:
     static const int t = 2;
 
     struct Node {
-        list<int> keys;
-        list<Node*> children;
-        bool leaf;
-        int n;
+      list<int> keys;
+      list<Node*> children;
+      bool leaf;
+      int n;
     };
 
     BTree() {
-        root_ = new Node;
-        root_->leaf = true;
-        root_->n = 0;
+      root_ = new Node;
+      root_->leaf = true;
+      root_->n = 0;
     }
 
     ~BTree() {
-        Release(root_);
+      Release(root_);
     }
 
     template<class T>
-    typename T::iterator list_at(T &l, int index) {
+      typename T::iterator list_at(T &l, int index) {
         int i = 0;
         auto iter = l.begin();
         while (iter != l.end() && i < index) {
-            ++i; ++iter;
+          ++i; ++iter;
         }
         return iter;
-    }
+      }
 
     pair<Node*, int> Search(int key) {
-        return Search(root_, key);
+      return Search(root_, key);
     }
 
     void Insert(int key) {
-        Node *r = root_;
-        if (2*t - 1 == r->n) {
-            root_ = new Node;
-            root_->leaf = false;
-            root_->n = 0;
-            root_->children.push_front(r);
-            SplitChild(root_, 0);
-            InsertNotFull(root_, key);
-        } else {
-            InsertNotFull(r, key);
-        }
+      Node *r = root_;
+      if (2*t - 1 == r->n) {
+        root_ = new Node;
+        root_->leaf = false;
+        root_->n = 0;
+        root_->children.push_front(r);
+        SplitChild(root_, 0);
+        InsertNotFull(root_, key);
+      } else {
+        InsertNotFull(r, key);
+      }
     }
 
     void Delete(int key) {
-        Delete(root_, key);
+      Delete(root_, key);
     }
 
-   void Print() {
-        Print(root_, 0);        
+    void Print() {
+      Print(root_, 0);        
     }
 
-private:
+  private:
     void PrintSpace(int n) {
-        while (n--) {
-            cout << "  ";
-        }
+      while (n--) {
+        cout << "  ";
+      }
     }
 
     void Print(Node *x, int deep) {
-//        PrintSpace(deep);
-//        cout << "size: " << x->n << endl;
-        auto iter_key = x->keys.begin();
-        auto iter_child = x->children.begin();
+      //        PrintSpace(deep);
+      //        cout << "size: " << x->n << endl;
+      auto iter_key = x->keys.begin();
+      auto iter_child = x->children.begin();
 
-        while (iter_key != x->keys.end()) {
-            if (iter_child != x->children.end()) {
-                Print(*iter_child, deep+1);
-                ++iter_child;
-            }
-
-            PrintSpace(deep);
-            cout << *iter_key << endl;
-            ++iter_key;
-        }
-
+      while (iter_key != x->keys.end()) {
         if (iter_child != x->children.end()) {
-            Print(*iter_child, deep+1);
+          Print(*iter_child, deep+1);
+          ++iter_child;
         }
+
+        PrintSpace(deep);
+        cout << *iter_key << endl;
+        ++iter_key;
+      }
+
+      if (iter_child != x->children.end()) {
+        Print(*iter_child, deep+1);
+      }
     }
 
     void Release(Node *x) {
-        for (auto child : x->children) {
-            Release(child);
-        }
-        delete(x);
+      for (auto child : x->children) {
+        Release(child);
+      }
+      delete(x);
     }
 
     pair<Node*, int> Search(Node *x, int key) {
-        auto iter_key = x->keys.begin();
-        auto iter_child = x->children.begin();
+      auto iter_key = x->keys.begin();
+      auto iter_child = x->children.begin();
 
-        while (iter_key != x->keys.end() && key > *iter_key) {
-            ++iter_key;
-            ++iter_child;
-        }
+      while (iter_key != x->keys.end() && key > *iter_key) {
+        ++iter_key;
+        ++iter_child;
+      }
 
-        if (iter_key != x->keys.end() && key == *iter_key) {
-            return {x, key};
+      if (iter_key != x->keys.end() && key == *iter_key) {
+        return {x, key};
         } else if (x->leaf) {
             return {0, 0};
         } else {

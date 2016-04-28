@@ -29,7 +29,7 @@ class Matrix {
     }
 
     Matrix(const Array2D &a) {
-        _matrix = a;
+      _matrix = a;
     }
 
     Matrix(const vector<vector<float>> &v) {
@@ -95,9 +95,9 @@ void DisplayArray(const T &a) {
 
 template <int M>
 array<float, M> LUPSolve(const Matrix<M, M> &L, 
-                         const Matrix<M, M> &U, 
-                         const array<int, M> &P,
-                         const array<float, M> &b) {
+    const Matrix<M, M> &U, 
+    const array<int, M> &P,
+    const array<float, M> &b) {
   array<float, M> x;
   array<float, M> y;
   for (int i = 0; i < M; ++i) {

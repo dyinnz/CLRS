@@ -94,8 +94,8 @@ int main() {
   int d, x, y;
   tie(d, x, y) = extented_gcd(99, 78);
   cout << d << ' '
-       << x << ' '
-       << y << endl;
+    << x << ' '
+    << y << endl;
   cout << ModularLinearEquationSolver(14, 30, 100) << endl;
 
   for (int i = 3; i < 30; i +=2) {

@@ -15,101 +15,101 @@
 using namespace std;
 
 struct Edge {
-    int u, v, w;
+  int u, v, w;
 };
 
 class MatrixGraph {
-public:
+  public:
     MatrixGraph(const size_t vn) : _vn(vn) {
-        _weights = new int[_vn * _vn];
-        _distances = new int[_vn * _vn];
-        _parents = new size_t[_vn * _vn];
+      _weights = new int[_vn * _vn];
+      _distances = new int[_vn * _vn];
+      _parents = new size_t[_vn * _vn];
 
-        memset(_weights, 0, sizeof(int) * _vn * _vn);
-        memset(_parents, -1, sizeof(size_t) * _vn * _vn);
+      memset(_weights, 0, sizeof(int) * _vn * _vn);
+      memset(_parents, -1, sizeof(size_t) * _vn * _vn);
 
-        for (size_t i = 0; i < _vn; ++i) {
-            for (size_t j = 0; j < _vn; ++j) {
-                SetDistance(i, j, INT_MAX);
-            }
+      for (size_t i = 0; i < _vn; ++i) {
+        for (size_t j = 0; j < _vn; ++j) {
+          SetDistance(i, j, INT_MAX);
         }
+      }
     }
-    
-    void ReadGraph(const vector<Edge> &edges) {
-        for (auto &edge : edges) {
-            SetWeight(edge.u, edge.v, edge.w);
-            SetDistance(edge.u, edge.v, edge.w);
-            SetParent(edge.u, edge.v, edge.u);
-        }
 
-        for (size_t i = 0; i < _vn; ++i) {
-            SetWeight(i, i, 0);
-            SetDistance(i, i, 0);
-        }
+    void ReadGraph(const vector<Edge> &edges) {
+      for (auto &edge : edges) {
+        SetWeight(edge.u, edge.v, edge.w);
+        SetDistance(edge.u, edge.v, edge.w);
+        SetParent(edge.u, edge.v, edge.u);
+      }
+
+      for (size_t i = 0; i < _vn; ++i) {
+        SetWeight(i, i, 0);
+        SetDistance(i, i, 0);
+      }
     }
 
     int GetWeight(size_t x, size_t y) const { 
-        return *(_weights + x*_vn + y);
+      return *(_weights + x*_vn + y);
     }
 
     int GetDistance(size_t x, size_t y) const {
-        return *(_distances + x*_vn + y);
+      return *(_distances + x*_vn + y);
     }
 
     size_t GetParent(size_t x, size_t y) const {
-        return *(_parents + x*_vn + y);
+      return *(_parents + x*_vn + y);
     }
 
     size_t GetSize() const {
-        return _vn;
+      return _vn;
     }
 
     void FloydWarshall() {
-        for (size_t k = 0; k < _vn; ++k) {
+      for (size_t k = 0; k < _vn; ++k) {
         for (size_t i = 0; i < _vn; ++i) {
-        for (size_t j = 0; j < _vn; ++j) {
+          for (size_t j = 0; j < _vn; ++j) {
 
             if (INT_MAX == GetDistance(i, k) || INT_MAX == GetDistance(k, j)) {
-                continue;
+              continue;
             }
 
             if (GetDistance(i, j) > GetDistance(i, k) + GetDistance(k, j)) {
 
-                int dist = GetDistance(i, k) + GetDistance(k, j);
-                SetDistance(i, j, dist);
-                SetParent(i, j, GetParent(k, j));
+              int dist = GetDistance(i, k) + GetDistance(k, j);
+              SetDistance(i, j, dist);
+              SetParent(i, j, GetParent(k, j));
             }
 
-        } } }
+          } } }
 
-        DebugDistances();
-        DebugParents();
+      DebugDistances();
+      DebugParents();
     }
 
     void DebugDistances() {
-        cout << "Distance Matrix:" << endl;
-        for (size_t i = 0; i < _vn; ++i) {
-            for (size_t j = 0; j < _vn; ++j) {
-                if (GetDistance(i, j) == INT_MAX) {
-                    cout << "oo\t";
-                } else {
-                    cout << GetDistance(i, j) << '\t';
-                }
+      cout << "Distance Matrix:" << endl;
+      for (size_t i = 0; i < _vn; ++i) {
+        for (size_t j = 0; j < _vn; ++j) {
+          if (GetDistance(i, j) == INT_MAX) {
+            cout << "oo\t";
+          } else {
+            cout << GetDistance(i, j) << '\t';
+          }
 
-            }
-            cout << endl;
         }
         cout << endl;
+      }
+      cout << endl;
     }
 
     void DebugParents() {
-        cout << "Parents Matrix:" << endl;
-        for (size_t i = 0; i < _vn; ++i) {
-            for (size_t j = 0; j < _vn; ++j) {
-                if (UINT_MAX == GetParent(i, j)) {
-                    cout << "X\t";
-                } else {
-                    cout << GetParent(i, j) << '\t';
+      cout << "Parents Matrix:" << endl;
+      for (size_t i = 0; i < _vn; ++i) {
+        for (size_t j = 0; j < _vn; ++j) {
+          if (UINT_MAX == GetParent(i, j)) {
+            cout << "X\t";
+          } else {
+            cout << GetParent(i, j) << '\t';
                 }
             }
             cout << endl;

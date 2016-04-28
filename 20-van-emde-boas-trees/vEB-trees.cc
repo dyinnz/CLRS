@@ -7,109 +7,109 @@
 using namespace std;
 
 class vEBTree {
-public:
+  public:
     struct vEBNode {
-        int     max {INT_MIN},
-                min {INT_MIN};
-        int     u {0};
-        int     sqrt_u {0};
+      int     max {INT_MIN},
+              min {INT_MIN};
+      int     u {0};
+      int     sqrt_u {0};
 
-        vEBNode *summary {0};
-        vEBNode *cluster {0};
+      vEBNode *summary {0};
+      vEBNode *cluster {0};
 
-        int high(int key) {
-            return key / floor(sqrt(u));
-        }
+      int high(int key) {
+        return key / floor(sqrt(u));
+      }
 
-        int low(int key) {
-            return key % int(floor(sqrt(u)));
-        }
-        
-        int index(int x, int y) {
-            return x * floor(sqrt(u)) + y;
-        }
+      int low(int key) {
+        return key % int(floor(sqrt(u)));
+      }
+
+      int index(int x, int y) {
+        return x * floor(sqrt(u)) + y;
+      }
     };
 
     vEBTree(int u) {
-        root_ = new vEBNode;
-        InitNode(root_, u);
+      root_ = new vEBNode;
+      InitNode(root_, u);
     }
 
     ~vEBTree() {
-        Release(root_);
-        delete root_;
+      Release(root_);
+      delete root_;
     }
 
     int Minimum() {
-        return Minimum(root_);
+      return Minimum(root_);
     }
 
     int Maximum() {
-        return Maximum(root_);
+      return Maximum(root_);
     }
 
     bool Member(int key) {
-        return Member(root_, key);
+      return Member(root_, key);
     }
 
     int Successor(int key) {
-        return Successor(root_, key);
+      return Successor(root_, key);
     }
 
     int Predecessor(int key) {
-        return Predecessor(root_, key);
+      return Predecessor(root_, key);
     }
 
     void Insert(int key) {
-        Insert(root_, key);
+      Insert(root_, key);
     }
 
     void Delete(int key) {
-        Delete(root_, key);
-    }
-    
-    void Print() {
-        Print(root_, 0);
+      Delete(root_, key);
     }
 
-private:
+    void Print() {
+      Print(root_, 0);
+    }
+
+  private:
     int Minimum(vEBNode *v) {
-        return v->min;
+      return v->min;
     }
 
     int Maximum(vEBNode *v) {
-        return v->max;
+      return v->max;
     }
 
     bool Member(vEBNode *v, int key) {
-        if (key == v->min || key == v->max) {
-            return true;
-        } else if (2 == v->u) {
-            return false;
-        } else {
-            return Member(&v->cluster[v->high(key)], v->low(key));
-        }
+      if (key == v->min || key == v->max) {
+        return true;
+      } else if (2 == v->u) {
+        return false;
+      } else {
+        return Member(&v->cluster[v->high(key)], v->low(key));
+      }
     }
 
     int Successor(vEBNode *v, int key) {
-        if (2 == v->u) {
-            if (0 == key && 1 == v->max) {
-                return 1;
-            } else {
-                return INT_MIN;
-            }
+      if (2 == v->u) {
+        if (0 == key && 1 == v->max) {
+          return 1;
+        } else {
+          return INT_MIN;
+        }
 
-        } else if (INT_MIN != v->min && key < v->min) {
-            return v->min;
+      } else if (INT_MIN != v->min && key < v->min) {
+        return v->min;
+
+      } else {
+        int max_low = Maximum(&v->cluster[v->high(key)]);
+        if (INT_MIN != max_low && v->low(key) < max_low) {
+          int offset = Successor(&v->cluster[v->high(key)], v->low(key));
+          return v->index(v->high(key), offset);
 
         } else {
-            int max_low = Maximum(&v->cluster[v->high(key)]);
-            if (INT_MIN != max_low && v->low(key) < max_low) {
-                int offset = Successor(&v->cluster[v->high(key)], v->low(key));
-                return v->index(v->high(key), offset);
-
-            } else {
-                int succ_cluster = Successor(v->summary, v->high(key));
+          int succ_cluster = Successor(v->summary, v->high(key));
                 if (INT_MIN == succ_cluster) {
                     return INT_MIN;
                 } else {

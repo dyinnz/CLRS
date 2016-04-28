@@ -9,104 +9,104 @@
 using namespace std;
 
 class FibonacciHeap {
-public:
+  public:
     struct Node {
-        Node    *prev {0},
-                *next {0},
-                *parent {0},
-                *child {0};
-        int     key {0};
-        int     degree {0};
-        bool    mask {false};
+      Node    *prev {0},
+              *next {0},
+              *parent {0},
+              *child {0};
+      int     key {0};
+      int     degree {0};
+      bool    mask {false};
     };
 
     FibonacciHeap() : min_(0), head_(0), size_(0) {}
 
     ~FibonacciHeap() {
-        for (Node *p = head_; p; p = p->next) {
-            Release(p);
-            if (p->next == head_) break;
-        }
+      for (Node *p = head_; p; p = p->next) {
+        Release(p);
+        if (p->next == head_) break;
+      }
     }
 
     int min() {
-        return min_->key;
+      return min_->key;
     }
 
     Node* Insert(int key) {
-        Node *x = new Node;
-        x->key = key;
+      Node *x = new Node;
+      x->key = key;
 
-        if (!min_) {
-            x->next = x->prev = x;
-            min_ = x;
-            head_ = x;
+      if (!min_) {
+        x->next = x->prev = x;
+        min_ = x;
+        head_ = x;
 
-        } else {
-            ListInsert(head_, x);
-            if (key < min_->key) {
-                min_ = x;
-            }
+      } else {
+        ListInsert(head_, x);
+        if (key < min_->key) {
+          min_ = x;
         }
+      }
 
-        ++size_;
-        return x;
+      ++size_;
+      return x;
     }
 
     void Union(FibonacciHeap &H) {
-        Node *last = H.head_->prev;
-        last->next = head_->next;
-        H.head_->prev = head_;
+      Node *last = H.head_->prev;
+      last->next = head_->next;
+      H.head_->prev = head_;
 
-        head_->next->prev = last;
-        head_->next = H.head_;
-        
-        if (H.min_->key < min_->key) {
-            min_ = H.min_;
-        }
-        size_ += H.size_;
+      head_->next->prev = last;
+      head_->next = H.head_;
 
-        H.head_ = 0;
+      if (H.min_->key < min_->key) {
+        min_ = H.min_;
+      }
+      size_ += H.size_;
+
+      H.head_ = 0;
     }
 
     void Print() {
-        PrintNode(head_, 0);
-        cout << endl;
+      PrintNode(head_, 0);
+      cout << endl;
     }
 
     int ExtractMin() {
-        assert(min_);
+      assert(min_);
 
-        int min_key = min_->key;
+      int min_key = min_->key;
 
-        if (min_->child) {
-            Node *last = min_->child->prev;
-            last->next = head_->next;
-            min_->child->prev = head_;
+      if (min_->child) {
+        Node *last = min_->child->prev;
+        last->next = head_->next;
+        min_->child->prev = head_;
 
-            head_->next->prev = last;
-            head_->next = min_->child;
+        head_->next->prev = last;
+        head_->next = min_->child;
 
-            min_->child = 0;
+        min_->child = 0;
+      }
+
+      if (min_ == min_->next) {
+        delete min_;
+        min_ = 0;
+        head_ = 0;
+      } else {
+        if (head_ == min_) {
+          head_ = min_->next;
         }
+        ListDelete(min_);
+        delete min_;
 
-        if (min_ == min_->next) {
-            delete min_;
-            min_ = 0;
-            head_ = 0;
-        } else {
-            if (head_ == min_) {
-                head_ = min_->next;
-            }
-            ListDelete(min_);
-            delete min_;
+        min_ = head_;
+        Consolidate();
+      }
 
-            min_ = head_;
-            Consolidate();
-        }
-       
-        --size_;
-        return min_key;
+      --size_;
+      return min_key;
     }
 
     void DecreaseKey(Node *x , int key) {

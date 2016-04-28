@@ -6,50 +6,50 @@
 using namespace std;
 
 class DisjointSet {
-public:
+  public:
     DisjointSet(int size) : sets(size), flags(size) {
-        for (int i = 0; i < size; ++i) {
-            sets[i].parent = i;
-            sets[i].r = 0;
-        }
+      for (int i = 0; i < size; ++i) {
+        sets[i].parent = i;
+        sets[i].r = 0;
+      }
     }
 
     void Union(int x, int y) {
-        Link(Find(x), Find(y));
+      Link(Find(x), Find(y));
     }
-    
+
     int Find(int x) {
-        if (sets[x].parent != x) {
-            sets[x].parent = Find(sets[x].parent);
-        }
-        return sets[x].parent;
+      if (sets[x].parent != x) {
+        sets[x].parent = Find(sets[x].parent);
+      }
+      return sets[x].parent;
     }
 
     void SetFlag(int x, int flag) {
-        flags[Find(x)] = flag;
+      flags[Find(x)] = flag;
     }
 
     int GetFlag(int x) {
-        return flags[Find(x)];
+      return flags[Find(x)];
     }
 
-private:
+  private:
     struct Element {
-        int parent {-1};
-        int r {0};
+      int parent {-1};
+      int r {0};
     };
 
     void Link(int x, int y) {
-        if (sets[x].r > sets[y].r) {
-            sets[y].parent = x;
+      if (sets[x].r > sets[y].r) {
+        sets[y].parent = x;
 
-        } else {
-            sets[x].parent = y;
+      } else {
+        sets[x].parent = y;
 
-            if (sets[x].r == sets[y].r) {
-                sets[y].r += 1;
-            }
+        if (sets[x].r == sets[y].r) {
+          sets[y].r += 1;
         }
+      }
     }
 
     vector<Element> sets;
@@ -57,6 +57,6 @@ private:
 };
 
 int main() {
-    return 0;
+  return 0;
 }
 

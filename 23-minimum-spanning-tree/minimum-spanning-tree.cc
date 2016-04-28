@@ -8,108 +8,108 @@
 using namespace std;
 
 class DisjointSet {
-public:
+  public:
     DisjointSet(int size) : sets(size) {
-        for (int i = 0; i < size; ++i) {
-            sets[i].parent = i;
-            sets[i].r = 0;
-        }
+      for (int i = 0; i < size; ++i) {
+        sets[i].parent = i;
+        sets[i].r = 0;
+      }
     }
 
     void Union(int x, int y) {
-        Link(Find(x), Find(y));
-    }
-    
-    int Find(int x) {
-        if (sets[x].parent != x) {
-            sets[x].parent = Find(sets[x].parent);
-        }
-        return sets[x].parent;
+      Link(Find(x), Find(y));
     }
 
-private:
+    int Find(int x) {
+      if (sets[x].parent != x) {
+        sets[x].parent = Find(sets[x].parent);
+      }
+      return sets[x].parent;
+    }
+
+  private:
     struct Element {
-        int parent {-1};
-        int r {0};
+      int parent {-1};
+      int r {0};
     };
 
     void Link(int x, int y) {
-        if (sets[x].r > sets[y].r) {
-            sets[y].parent = x;
+      if (sets[x].r > sets[y].r) {
+        sets[y].parent = x;
 
-        } else {
-            sets[x].parent = y;
+      } else {
+        sets[x].parent = y;
 
-            if (sets[x].r == sets[y].r) {
-                sets[y].r += 1;
-            }
+        if (sets[x].r == sets[y].r) {
+          sets[y].r += 1;
         }
+      }
     }
 
     vector<Element> sets;
 };
 
 struct ToPoint {
-    ToPoint(int u = 0, int w = 0) : u(u), w(w) {}
-    int u;
-    int w;
+  ToPoint(int u = 0, int w = 0) : u(u), w(w) {}
+  int u;
+  int w;
 };
 
 struct Edge {
-    int v, u, w;
+  int v, u, w;
 };
 
 vector<list<ToPoint>> ReadGraph(const vector<Edge> &edges, size_t vn) {
 
-    vector<list<ToPoint>> graph(vn+1);
-    
-    for(size_t i = 0; i < edges.size(); ++i) {
-        int v = edges[i].v;
-        int u = edges[i].u;
-        int w = edges[i].w;
-        graph[v].push_back(ToPoint(u, w));
-        graph[u].push_back(ToPoint(v, w));
-    }
+  vector<list<ToPoint>> graph(vn+1);
 
-    return move(graph);
+  for(size_t i = 0; i < edges.size(); ++i) {
+    int v = edges[i].v;
+    int u = edges[i].u;
+    int w = edges[i].w;
+    graph[v].push_back(ToPoint(u, w));
+    graph[u].push_back(ToPoint(v, w));
+  }
+
+  return move(graph);
 }
 
 vector<pair<int, int>> Prim(const vector<list<ToPoint>> &graph) {
-    size_t vn = graph.size()-1;
-    vector<int> parent(vn+1);
-    vector<bool> visit(vn+1);
-    vector<pair<int, int>> mst;
-    mst.reserve(vn-1);
+  size_t vn = graph.size()-1;
+  vector<int> parent(vn+1);
+  vector<bool> visit(vn+1);
+  vector<pair<int, int>> mst;
+  mst.reserve(vn-1);
 
-    struct Vertex {
-        int u, key, parent;
-    };
-    auto f = [](Vertex &x, Vertex &y) { return x.key > y.key; };
+  struct Vertex {
+    int u, key, parent;
+  };
+  auto f = [](Vertex &x, Vertex &y) { return x.key > y.key; };
 
-    //priority_queue<Vertex, vector<Vertex>, function<bool(Vertex&, Vertex&)>> q(f);
-    priority_queue<Vertex, vector<Vertex>, decltype(f)> q(f);
+  //priority_queue<Vertex, vector<Vertex>, function<bool(Vertex&, Vertex&)>> q(f);
+  priority_queue<Vertex, vector<Vertex>, decltype(f)> q(f);
 
-    q.push( {1, 0, 0} );
-    
-    int total = 0;
-    while (!q.empty() && mst.size() < vn-1) {
-        int v = q.top().u;
-        int w = q.top().key;
-        int p = q.top().parent;
-        q.pop();
+  q.push( {1, 0, 0} );
 
-        if (visit[v]) {
-            continue;
-        }
-        visit[v] = true;
+  int total = 0;
+  while (!q.empty() && mst.size() < vn-1) {
+    int v = q.top().u;
+    int w = q.top().key;
+    int p = q.top().parent;
+    q.pop();
 
-        cout << v << " " << w <<  " " << p << endl;
+    if (visit[v]) {
+      continue;
+    }
+    visit[v] = true;
 
-        total += w;
+    cout << v << " " << w <<  " " << p << endl;
 
-        if (0 != p) {
-            mst.push_back( {p, v} );
-        }
+    total += w;
+
+    if (0 != p) {
+      mst.push_back( {p, v} );
+    }
         
         for (auto &tp : graph[v]) if (!visit[tp.u]) {
             q.push( {tp.u, tp.w, v} );

@@ -10,41 +10,41 @@ using namespace std;
 /******************************************************************************/
 
 class DirectAddress {
-public:
+  public:
     DirectAddress(size_t size) : size_(size) {
-        index_array_ = new size_t[size];
+      index_array_ = new size_t[size];
     }
 
     ~DirectAddress() {
-        delete [] index_array_;
+      delete [] index_array_;
     }
 
     void Insert(int x) {
-        index_array_[x] = T_.size();
-        T_.push_back(x);
+      index_array_[x] = T_.size();
+      T_.push_back(x);
     }
 
     const int* Search(int x) {
-        size_t index = index_array_[x];
-        if (index < T_.size() && T_[index] == x) {
-            return &T_[index];
-        } else {
-            return 0;
-        }
+      size_t index = index_array_[x];
+      if (index < T_.size() && T_[index] == x) {
+        return &T_[index];
+      } else {
+        return 0;
+      }
     }
 
     void Delete(int x) {
-        size_t index = index_array_[x];
-        if (index < T_.size() && T_[index] == x) {
-            swap(T_.back(), T_[index]);
-            T_.pop_back();
-            
-            index_array_[T_[index]] = index;
-            index_array_[x] = UINT_MAX;
-        }
+      size_t index = index_array_[x];
+      if (index < T_.size() && T_[index] == x) {
+        swap(T_.back(), T_[index]);
+        T_.pop_back();
+
+        index_array_[T_[index]] = index;
+        index_array_[x] = UINT_MAX;
+      }
     }
 
-private:
+  private:
     size_t *index_array_;
     size_t size_;
     vector<int> T_; 
@@ -53,42 +53,42 @@ private:
 /******************************************************************************/
 
 class ChainningHash {
-public:
+  public:
     ChainningHash() {
-        T_.resize(kSize);
+      T_.resize(kSize);
     }
 
     void Insert(int x) {
-        auto &L = T_[Hash(x)];
-        if (L.end() == find(L.begin(), L.end(), x)) {
-            L.push_front(x);
-        }
+      auto &L = T_[Hash(x)];
+      if (L.end() == find(L.begin(), L.end(), x)) {
+        L.push_front(x);
+      }
     }
 
     const int* Search(int x) {
-        auto &L = T_[Hash(x)];
-        auto it = find(L.begin(), L.end(), x);
-        if (it != L.end()) {
-            return &*it;
-        } else {
-            return 0;
-        }
+      auto &L = T_[Hash(x)];
+      auto it = find(L.begin(), L.end(), x);
+      if (it != L.end()) {
+        return &*it;
+      } else {
+        return 0;
+      }
     }
 
     void Delete(int x) {
-        auto &L = T_[Hash(x)];
-        for (auto it = L.begin(), last = L.before_begin(); 
-            it != L.end(); ++it, ++last) {
-            if (*it == x) {
-                L.erase_after(last);
-                return;
-            }
+      auto &L = T_[Hash(x)];
+      for (auto it = L.begin(), last = L.before_begin(); 
+          it != L.end(); ++it, ++last) {
+        if (*it == x) {
+          L.erase_after(last);
+          return;
         }
+      }
     }
 
-private:
+  private:
     int Hash(int x) {
-        return x % kSize;
+      return x % kSize;
     }
 
     static const int kSize = 10007;
@@ -99,17 +99,17 @@ private:
 /******************************************************************************/
 
 class OpenAddressHash {
-public:
+  public:
     OpenAddressHash() {
-        T_.resize(kSize, INT_MIN);
+      T_.resize(kSize, INT_MIN);
     }
 
     void Insert(int x) {
-        int h = Hash(x);
-        for (int i = 0; i < kSize; ++i) {
-            if (kNil != T_[h] || kDelete != T_[h]) {
-                T_[h] = x;
-                return;
+      int h = Hash(x);
+      for (int i = 0; i < kSize; ++i) {
+        if (kNil != T_[h] || kDelete != T_[h]) {
+          T_[h] = x;
+          return;
             }
             h = (h + i) % kSize;
         }

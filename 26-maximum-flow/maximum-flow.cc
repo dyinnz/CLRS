@@ -56,7 +56,7 @@ class FlowGraph {
       path.clear();
 
       cout << __func__ << endl;
-      
+
       // using BFS
       vector<Edge*> last_edge(_graph.size());
       queue<int> q;

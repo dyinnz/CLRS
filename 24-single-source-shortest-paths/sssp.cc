@@ -14,102 +14,102 @@
 
 using namespace std;
 struct Edge {
-    Edge(int u = 0, int v = 0, int w = 0) : u(u), v(v), w(w) {}
-    int u, v, w;
+  Edge(int u = 0, int v = 0, int w = 0) : u(u), v(v), w(w) {}
+  int u, v, w;
 };
 
 struct Node {
-    Node (int index = 0) : index(index), distance(INT_MAX), parent(UINT_MAX) {}
-    int index;
-    int distance;
-    size_t parent;
-    list<pair<size_t, int>> edges;
+  Node (int index = 0) : index(index), distance(INT_MAX), parent(UINT_MAX) {}
+  int index;
+  int distance;
+  size_t parent;
+  list<pair<size_t, int>> edges;
 };
 
 vector<Node> ReadGraph(const vector<Edge> &edges, size_t vn) {
-    vector<Node> graph(vn);
-    for (size_t i = 0; i < vn; ++i) {
-        graph[i].index = i;
-    }
+  vector<Node> graph(vn);
+  for (size_t i = 0; i < vn; ++i) {
+    graph[i].index = i;
+  }
 
-    for (auto &e : edges) {
-        // cout << __func__ << " " << e.u << " " << e.v << endl; 
-        graph[e.u].edges.push_back( {e.v, e.w} );
-    }
-    return move(graph);
+  for (auto &e : edges) {
+    // cout << __func__ << " " << e.u << " " << e.v << endl; 
+    graph[e.u].edges.push_back( {e.v, e.w} );
+  }
+  return move(graph);
 }
 
 void Relax(Node *u, Node *v, int w) {
-    if (INT_MAX == u->distance) {
-        return;
+  if (INT_MAX == u->distance) {
+    return;
 
-    } else if (v->distance > u->distance + w) {
-        v->distance = u->distance + w;
-        v->parent = u->index;
-    }
+  } else if (v->distance > u->distance + w) {
+    v->distance = u->distance + w;
+    v->parent = u->index;
+  }
 }
 
 bool BellmanFord(vector<Node> &graph, const vector<Edge> &edges, int s) {
-    assert(!graph.empty());
+  assert(!graph.empty());
 
-    graph[s].distance = 0;
+  graph[s].distance = 0;
 
-    for (size_t i = 0; i < graph.size(); ++i) {
-        for (auto &e : edges) {
-            Relax(&graph[e.u], &graph[e.v], e.w);
-        }
-    }
-
+  for (size_t i = 0; i < graph.size(); ++i) {
     for (auto &e : edges) {
-        if (graph[e.v].distance > graph[e.u].distance + e.w) {
-            return false;
-        }
+      Relax(&graph[e.u], &graph[e.v], e.w);
     }
+  }
 
-    return true;
+  for (auto &e : edges) {
+    if (graph[e.v].distance > graph[e.u].distance + e.w) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void TopoDFS(vector<Node> &graph, Node *pu, vector<Node*> &topo_order) {
-    pu->distance = -1;
+  pu->distance = -1;
 
-    for (auto &edge : pu->edges) {
-        Node &v = graph[edge.first];
-        if (-1 != v.distance) {
-            TopoDFS(graph, &v, topo_order);
-        }
+  for (auto &edge : pu->edges) {
+    Node &v = graph[edge.first];
+    if (-1 != v.distance) {
+      TopoDFS(graph, &v, topo_order);
     }
+  }
 
-    topo_order.push_back(pu);
+  topo_order.push_back(pu);
 }
 
 vector<Node*> TopoSort(vector<Node> &graph, int s) {
-    vector<Node*> topo_order;
+  vector<Node*> topo_order;
 
-    for (auto &node : graph) {
-        node.distance = 0;
-    }
+  for (auto &node : graph) {
+    node.distance = 0;
+  }
 
-    TopoDFS(graph, &graph[s], topo_order);
-    
-    return move(topo_order);
+  TopoDFS(graph, &graph[s], topo_order);
+
+  return move(topo_order);
 }
 
 void DAGShortestPaths(vector<Node> &graph, int s) {
-    assert(!graph.empty());
+  assert(!graph.empty());
 
-    auto topo_order = TopoSort(graph, s);
+  auto topo_order = TopoSort(graph, s);
 
-    // clear the distance
-    for (auto &node : graph) {
-        node.distance = INT_MAX;
+  // clear the distance
+  for (auto &node : graph) {
+    node.distance = INT_MAX;
+  }
+  graph[s].distance = 0;
+
+  for (auto iter = topo_order.rbegin(); iter != topo_order.rend(); ++iter) {
+    Node *pu = *iter;
+    for (auto &edge : pu->edges) {
+      Relax(pu, &graph[edge.first], edge.second);
     }
-    graph[s].distance = 0;
-
-    for (auto iter = topo_order.rbegin(); iter != topo_order.rend(); ++iter) {
-        Node *pu = *iter;
-        for (auto &edge : pu->edges) {
-            Relax(pu, &graph[edge.first], edge.second);
-        }
     }
 }
 

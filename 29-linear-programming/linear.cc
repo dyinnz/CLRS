@@ -26,7 +26,7 @@ class Matrix {
     }
 
     Matrix(const Array2D &a) {
-        _matrix = a;
+      _matrix = a;
     }
 
     Matrix(const vector<vector<float>> &v) {

@@ -5,111 +5,111 @@
 using namespace std;
 
 class OSTree {
-private:
+  private:
     enum Color { kRed, kBlack };
 
-public:
+  public:
     struct Node {
-        int x, size;
-        Node *left, *right, *parent;
-        Color color;
+      int x, size;
+      Node *left, *right, *parent;
+      Color color;
     };
-    
+
     OSTree() : nil_(&sentinel_), root_(nil_) {
-        sentinel_.parent = sentinel_.left = sentinel_.right = nil_;
-        sentinel_.color = Color::kBlack;
-        sentinel_.x = 0;
-        sentinel_.size = 0;
+      sentinel_.parent = sentinel_.left = sentinel_.right = nil_;
+      sentinel_.color = Color::kBlack;
+      sentinel_.x = 0;
+      sentinel_.size = 0;
     }
 
     ~OSTree() {
-        Release(root_);
+      Release(root_);
     }
 
     Node* Select(int i) {
-        ++i;
+      ++i;
 
-        //return SelectRecur(root_, i);
-        Node *p = root_;
-        while (nil_ != p) {
-            int r = p->left->size + 1;
-            if (i == r) {
-                return p;
-            } else if (i < r) {
-                p = p->left;
-            } else {
-                p = p->right;
-                i -= r;
-            }
+      //return SelectRecur(root_, i);
+      Node *p = root_;
+      while (nil_ != p) {
+        int r = p->left->size + 1;
+        if (i == r) {
+          return p;
+        } else if (i < r) {
+          p = p->left;
+        } else {
+          p = p->right;
+          i -= r;
         }
-        return 0;
+      }
+      return 0;
     }
 
     int Rank(const Node *p) {
-        int r = p->left->size + 1;
-        while (root_ != p) {
-            if (p == p->parent->right) {
-                r += p->parent->left->size + 1;
-            }
-            p = p->parent;
+      int r = p->left->size + 1;
+      while (root_ != p) {
+        if (p == p->parent->right) {
+          r += p->parent->left->size + 1;
         }
-        return r-1;
+        p = p->parent;
+      }
+      return r-1;
     }
-    
+
     int KeyRank(int x) {
-        Node *p = root_;
-        int r = 0;
-        while (x != p->x) {
-            if (nil_ == p) {
-                return -1;
-            }
-            if (x < p->x) {
-                p = p->left;
-            } else {
-                r += p->left->size + 1;
-                p = p->right;
-            }
+      Node *p = root_;
+      int r = 0;
+      while (x != p->x) {
+        if (nil_ == p) {
+          return -1;
         }
-        return r;
+        if (x < p->x) {
+          p = p->left;
+        } else {
+          r += p->left->size + 1;
+          p = p->right;
+        }
+      }
+      return r;
     }
 
     Node* Search(int x) {
-        Node *p = root_;
-        while (nil_ != p && x != p->x) {
-            if (x < p->x) {
-                p = p->left;
-            } else {
-                p = p->right;
-            }
+      Node *p = root_;
+      while (nil_ != p && x != p->x) {
+        if (x < p->x) {
+          p = p->left;
+        } else {
+          p = p->right;
         }
-        return p;
+      }
+      return p;
     }
 
     Node* Insert(int x) {
-        Node *last = nil_;
-        Node *p = root_;
-        while (nil_ != p) {
-            // Add
-            ++p->size;
+      Node *last = nil_;
+      Node *p = root_;
+      while (nil_ != p) {
+        // Add
+        ++p->size;
 
-            last = p;
-            if (x < p->x) {
-                p = p->left;
-            } else {
-                p = p->right;
-            }
+        last = p;
+        if (x < p->x) {
+          p = p->left;
+        } else {
+          p = p->right;
         }
+      }
 
-        Node *inserted = new Node;
-        inserted->x = x;
-        inserted->left = nil_;
-        inserted->right = nil_;
-        inserted->color = Color::kRed;
-        inserted->parent = last;
-        inserted->size = 1;
+      Node *inserted = new Node;
+      inserted->x = x;
+      inserted->left = nil_;
+      inserted->right = nil_;
+      inserted->color = Color::kRed;
+      inserted->parent = last;
+      inserted->size = 1;
 
-        if (nil_ == last) {
-            root_ = inserted;
+      if (nil_ == last) {
+        root_ = inserted;
         } else if (inserted->x < last->x) {
             last->left = inserted;
         } else {

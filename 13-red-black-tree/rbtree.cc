@@ -6,110 +6,110 @@
 using namespace std;
 
 class RBTree {
-private:
+  private:
     enum class Color { kRed, kBlack };
 
-public:
+  public:
     struct Node {
-        int x;
-        Node *left, *right, *parent;
-        Color color;  
+      int x;
+      Node *left, *right, *parent;
+      Color color;  
     };
 
     RBTree() : nil_(&sentinel_), root_(nil_), black_height_(0) {
-        sentinel_.parent = sentinel_.left = sentinel_.right = nil_;
-        sentinel_.x = 0;
-        sentinel_.color = Color::kBlack;
+      sentinel_.parent = sentinel_.left = sentinel_.right = nil_;
+      sentinel_.x = 0;
+      sentinel_.color = Color::kBlack;
     }
 
     ~RBTree() {
-        Release(root_); 
+      Release(root_); 
     }
 
     Node* Search(int x) {
-        Node *p = root_;
-        while (p && x != p->x) {
-            if (x < p->x) {
-                p = p->left;
-            } else {
-                p = p->right;
-            }
+      Node *p = root_;
+      while (p && x != p->x) {
+        if (x < p->x) {
+          p = p->left;
+        } else {
+          p = p->right;
         }
-        return p;
+      }
+      return p;
     }
 
     Node* Debug_Search(int x) {
-        Node *p = root_;
-        while (p && x != p->x) {
-            cout << p->x;
-            if (Color::kRed == p->color) {
-                cout << " Red" << endl;
-            } else {
-                cout << " Black" << endl;
-            }
-            if (x < p->x) {
-                p = p->left;
-            } else {
-                p = p->right;
-            }
+      Node *p = root_;
+      while (p && x != p->x) {
+        cout << p->x;
+        if (Color::kRed == p->color) {
+          cout << " Red" << endl;
+        } else {
+          cout << " Black" << endl;
         }
-        if (p) {
-            cout << p->x;
-            if (Color::kRed == p->color) {
-                cout << " Red" << endl;
-            } else {
-                cout << " Black" << endl;
-            }
+        if (x < p->x) {
+          p = p->left;
+        } else {
+          p = p->right;
         }
-        return p;
+      }
+      if (p) {
+        cout << p->x;
+        if (Color::kRed == p->color) {
+          cout << " Red" << endl;
+        } else {
+          cout << " Black" << endl;
+        }
+      }
+      return p;
     }
 
     void Insert(int x) {
-        Node *last = nil_;
-        Node *p = root_;
-        while (nil_ != p) {
-            last = p;
-            if (x < p->x) {
-                p = p->left;
-            } else {
-                p = p->right;
-            }
-        }
-
-        Node *inserted = new Node;
-        inserted->x = x;
-        inserted->left = nil_;
-        inserted->right = nil_;
-        inserted->color = Color::kRed;
-        inserted->parent = last;
-
-        if (nil_ == last) {
-            root_ = inserted;
-        } else if (inserted->x < last->x) {
-            last->left = inserted;
+      Node *last = nil_;
+      Node *p = root_;
+      while (nil_ != p) {
+        last = p;
+        if (x < p->x) {
+          p = p->left;
         } else {
-            last->right = inserted;
+          p = p->right;
         }
+      }
 
-        InsertFixUp(inserted);
+      Node *inserted = new Node;
+      inserted->x = x;
+      inserted->left = nil_;
+      inserted->right = nil_;
+      inserted->color = Color::kRed;
+      inserted->parent = last;
+
+      if (nil_ == last) {
+        root_ = inserted;
+      } else if (inserted->x < last->x) {
+        last->left = inserted;
+      } else {
+        last->right = inserted;
+      }
+
+      InsertFixUp(inserted);
     }
 
     void Delete(Node *p) {
-        Node *x = nil_;
-        Node *y = p;
-        Color y_original_color = y->color;
-        if (nil_ == p->left) {
-            x = p->right;
-            Transplant(p, p->right);
-        } else if (nil_ == p->right) {
-            x = p->left;
-            Transplant(p, p->left);
-        } else {
-            y = Minimum(p->right);
-            x = y->right;
+      Node *x = nil_;
+      Node *y = p;
+      Color y_original_color = y->color;
+      if (nil_ == p->left) {
+        x = p->right;
+        Transplant(p, p->right);
+      } else if (nil_ == p->right) {
+        x = p->left;
+        Transplant(p, p->left);
+      } else {
+        y = Minimum(p->right);
+        x = y->right;
 
-            if (y->parent == p) {
-                x->parent = y;
+        if (y->parent == p) {
+          x->parent = y;
             } else {
                 Transplant(y, x);
                 y->right = p->right;

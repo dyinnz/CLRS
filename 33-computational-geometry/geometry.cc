@@ -72,13 +72,13 @@ bool OnSegments(const Vector &pi, const Vector &pj, const Vector &pk) {
 }
 
 bool SegmentsIntersect(const Vector &p1, const Vector &p2, 
-                       const Vector &p3, const Vector &p4) {
+    const Vector &p3, const Vector &p4) {
   int d1 = direction(p3, p4, p1);
   int d2 = direction(p3, p4, p2);
   int d3 = direction(p1, p2, p3);
   int d4 = direction(p1, p2, p4);
   if ( ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
-       ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
+      ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
     return true;
   } else if (0 == d1 && OnSegments(p3, p4, p1)) {
     return true;

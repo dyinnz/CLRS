@@ -7,109 +7,109 @@ using namespace std;
 /******************************************************************************/
 
 class BinaryTree {
-public:
+  public:
     struct Node {
-        Node *parent, *left, *right;
-        int x;
+      Node *parent, *left, *right;
+      int x;
     };
 
     BinaryTree() : root_(0) {}
 
     ~BinaryTree() {
-        Release(root_);
+      Release(root_);
     }
 
     void Insert(int x) {
-        Node *last(nullptr);
-        Node *p(root_);
+      Node *last(nullptr);
+      Node *p(root_);
 
-        while (p) {
-            last = p;
-            if (x < p->x) {
-                p = p->left;
-            } else {
-                p = p->right;
-            }
-        }
-
-        Node *inserted = new Node;
-        inserted->x = x;
-        inserted->parent = last;
-        inserted->left = nullptr;
-        inserted->right = nullptr;
-
-        if (!last) {
-            root_ = inserted;
-        } else if (inserted->x < last->x) {
-            last->left = inserted;
+      while (p) {
+        last = p;
+        if (x < p->x) {
+          p = p->left;
         } else {
-            last->right = inserted;
+          p = p->right;
         }
+      }
+
+      Node *inserted = new Node;
+      inserted->x = x;
+      inserted->parent = last;
+      inserted->left = nullptr;
+      inserted->right = nullptr;
+
+      if (!last) {
+        root_ = inserted;
+      } else if (inserted->x < last->x) {
+        last->left = inserted;
+      } else {
+        last->right = inserted;
+      }
     }
 
     void InsertX(int x) {
-        Insert(root_, x);
+      Insert(root_, x);
     }
 
     Node* Search(int x) {
-        Node *p = root_;
-        while (p && x != p->x) {
-            if (x < p->x) {
-                p = p->left;
-            } else {
-                p = p->right;
-            }
+      Node *p = root_;
+      while (p && x != p->x) {
+        if (x < p->x) {
+          p = p->left;
+        } else {
+          p = p->right;
         }
-        return p;
+      }
+      return p;
     }
 
     Node *Minimum() {
-        return Minimum(root_);
+      return Minimum(root_);
     }
 
     Node *Maximum() {
-        return Maximum(root_);
+      return Maximum(root_);
     }
 
     static Node *Predecessor(Node *p) {
-        if (p->left) {
-            return Maximum(p->left);
-        }
-        Node *prior = p->parent;
-        while (prior && p == prior->left) {
-            p = prior;
-            prior = prior->parent;
-        }
-        return prior;
+      if (p->left) {
+        return Maximum(p->left);
+      }
+      Node *prior = p->parent;
+      while (prior && p == prior->left) {
+        p = prior;
+        prior = prior->parent;
+      }
+      return prior;
     }
 
     static Node *Successor(Node *p) {
-        if (p->right) {
-            return Minimum(p->right);
-        }
-        Node *prior = p->parent;
-        while (prior && p == prior->right) {
-            p = prior;
-            prior = prior->parent;
-        }
-        return prior;
+      if (p->right) {
+        return Minimum(p->right);
+      }
+      Node *prior = p->parent;
+      while (prior && p == prior->right) {
+        p = prior;
+        prior = prior->parent;
+      }
+      return prior;
     }
 
     void Delete(Node *p) {
-        if (!p->left) {
-            Transplant(p, p->right);
-        } else if (!p->right) {
-            Transplant(p, p->left);
-        } else {
-            Node *next = Minimum(p->right);
-            if (next->parent != p) {
-                Transplant(next, next->right);
-                next->right = p->right;
-                next->right->parent = next;
-            }
-            Transplant(p, next);
-            next->left = p->left;
-            next->left->parent = next;
+      if (!p->left) {
+        Transplant(p, p->right);
+      } else if (!p->right) {
+        Transplant(p, p->left);
+      } else {
+        Node *next = Minimum(p->right);
+        if (next->parent != p) {
+          Transplant(next, next->right);
+          next->right = p->right;
+          next->right->parent = next;
+        }
+        Transplant(p, next);
+        next->left = p->left;
+        next->left->parent = next;
         }
         delete p;
     }

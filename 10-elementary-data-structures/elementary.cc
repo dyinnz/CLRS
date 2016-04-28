@@ -6,110 +6,110 @@ using namespace std;
 
 template <class T, int kMaxSize = 100>
 class Stack {
-public:
+  public:
     Stack() : size_(0) {}
 
     bool Empty() const {
-        return 0 == size_;
+      return 0 == size_;
     }
 
     void Push(T x) {
-        p_[size_++] = x;
+      p_[size_++] = x;
     }
 
     T Pop() {
-        assert(!Empty());
-        return p_[--size_];
+      assert(!Empty());
+      return p_[--size_];
     }
 
     size_t Size() const {
-        return size_;
+      return size_;
     }
-    
-private:
+
+  private:
     T       p_[kMaxSize];
     size_t  size_;
 };
 
 template <class T, int kMaxSize = 100>
 class Queue {
-public:
+  public:
     Queue() : head_(0), tail_(0) {}
 
     bool Empty() const {
-        return head_ == tail_;
+      return head_ == tail_;
     }
 
     void Push(T x) {
-        // assert(Size() < kMaxSize);
-        p_[tail_++] = x;
-        if (tail_ == kMaxSize+1) tail_ = 0;
+      // assert(Size() < kMaxSize);
+      p_[tail_++] = x;
+      if (tail_ == kMaxSize+1) tail_ = 0;
     }
 
     T Pop() {
-        assert(!Empty());
-        T &x = p_[head_];
-        if (++head_ == kMaxSize+1) head_ = 0;
-        return x;
+      assert(!Empty());
+      T &x = p_[head_];
+      if (++head_ == kMaxSize+1) head_ = 0;
+      return x;
     }
 
     size_t Size() const {
-        if (tail_ >= head_) return tail_ - head_;
-        else return kMaxSize+1 - (head_ - tail_);
+      if (tail_ >= head_) return tail_ - head_;
+      else return kMaxSize+1 - (head_ - tail_);
     }
 
-private:
+  private:
     T       p_[kMaxSize+1]; 
     size_t  head_, tail_;
 };
 
 template <class T, int kMaxSize = 100>
 class Deque {
-public:
+  public:
     Deque() : head_(kMaxSize/2), tail_(kMaxSize/2+1) {}
 
     bool Empty() const {
-        return tail_ == head_+1 || (tail_ == 0 && head_ == kMaxSize);
+      return tail_ == head_+1 || (tail_ == 0 && head_ == kMaxSize);
     } 
-    
-    void PushFront(T x) {
-        p_[head_] = x;
 
-        if (0 == head_) head_ = kMaxSize;
-        else --head_;
+    void PushFront(T x) {
+      p_[head_] = x;
+
+      if (0 == head_) head_ = kMaxSize;
+      else --head_;
     }
 
     T PopFront() {
-        assert(!Empty());
-        if (kMaxSize+1 == ++head_) head_ = 0;
-        return p_[head_];
+      assert(!Empty());
+      if (kMaxSize+1 == ++head_) head_ = 0;
+      return p_[head_];
     }
 
     void PushBack(T x) {
-        p_[tail_++] = x;
-        if (kMaxSize+1 == tail_) tail_ = 0;
+      p_[tail_++] = x;
+      if (kMaxSize+1 == tail_) tail_ = 0;
     }
 
     T PopBack() {
-        assert(!Empty());
-        if (0 == tail_) tail_ = kMaxSize;
-        else --tail_;
-        return p_[tail_];
+      assert(!Empty());
+      if (0 == tail_) tail_ = kMaxSize;
+      else --tail_;
+      return p_[tail_];
     }
 
     size_t Size() const {
-        if (tail_ > head_) return tail_ - head_ - 1;
-        else return kMaxSize+1 - (head_ - tail_);
+      if (tail_ > head_) return tail_ - head_ - 1;
+      else return kMaxSize+1 - (head_ - tail_);
     }
 
-public:  
+  public:  
     T      p_[kMaxSize+1];
     size_t  head_, tail_;
 };
 
 /*
-template<class T>
-class DoubleList {
+   template<class T>
+   class DoubleList {
 public:
     DoubleList() : head_(0) {}
 

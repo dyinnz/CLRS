@@ -13,91 +13,91 @@ using namespace std;
 #define parent(x) ((x-1)>>1)
 
 vector<int> GeneratorAarray(int n) {
-    srand(time(NULL)); 
-    vector<int> ret(n);
-    generate(ret.begin(), ret.end(), [](){ return (rand()&0xff)-0x7f;} );
-    return move(ret);
+  srand(time(NULL)); 
+  vector<int> ret(n);
+  generate(ret.begin(), ret.end(), [](){ return (rand()&0xff)-0x7f;} );
+  return move(ret);
 }
 
 bool IsMaxHeap(vector<int> &A, size_t heap_size) {
-    for (size_t i = 0; i < heap_size; ++i) {
-        if (left_child(i) < heap_size && A[left_child(i)] > A[i]) {
-            return false;
-        }
-        if (right_child(i) < heap_size && A[right_child(i)] > A[i]) {
-            return false;
-        }
+  for (size_t i = 0; i < heap_size; ++i) {
+    if (left_child(i) < heap_size && A[left_child(i)] > A[i]) {
+      return false;
     }
-    return true;
+    if (right_child(i) < heap_size && A[right_child(i)] > A[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void MaxHeapify(vector<int> &A, size_t heap_size, size_t pos) {
-    size_t left = left_child(pos);
-    size_t right = right_child(pos);
+  size_t left = left_child(pos);
+  size_t right = right_child(pos);
 
-    size_t maxpos {0};
-    if (left < heap_size && A[left] > A[pos]) {
-        maxpos = left;
-    } else {
-        maxpos = pos;
-    }
-    if (right < heap_size && A[right] > A[maxpos]) {
-        maxpos = right;
-    }
-    if (maxpos != pos) {
-        swap(A[pos], A[maxpos]);
-        MaxHeapify(A, heap_size, maxpos);
-    }
+  size_t maxpos {0};
+  if (left < heap_size && A[left] > A[pos]) {
+    maxpos = left;
+  } else {
+    maxpos = pos;
+  }
+  if (right < heap_size && A[right] > A[maxpos]) {
+    maxpos = right;
+  }
+  if (maxpos != pos) {
+    swap(A[pos], A[maxpos]);
+    MaxHeapify(A, heap_size, maxpos);
+  }
 }
 
 void BuildMapHeap(vector<int> &A) {
-    for (int i = (A.size()-1)/2; i >= 0; --i) {
-        MaxHeapify(A, A.size(), i);
-    }
+  for (int i = (A.size()-1)/2; i >= 0; --i) {
+    MaxHeapify(A, A.size(), i);
+  }
 }
 
 void HeapSort(vector<int> &A) {
-    BuildMapHeap(A);
-    for (size_t i = A.size()-1; i >= 1; --i) {
-        swap(A[i], A[0]);
-        MaxHeapify(A, i, 0);
-    }
+  BuildMapHeap(A);
+  for (size_t i = A.size()-1; i >= 1; --i) {
+    swap(A[i], A[0]);
+    MaxHeapify(A, i, 0);
+  }
 }
 
 /******************************************************************************/
 
 int HeapMaximum(vector<int> &A) {
-    return A[0];
+  return A[0];
 }
 
 int HeapExtractMax(vector<int> &A) {
-    assert(!A.empty());
+  assert(!A.empty());
 
-    int maxv = A.front();
-    A.front() = A.back();
-    A.pop_back();
-    MaxHeapify(A, A.size(), 0);
-    return maxv;
+  int maxv = A.front();
+  A.front() = A.back();
+  A.pop_back();
+  MaxHeapify(A, A.size(), 0);
+  return maxv;
 }
 
 void HeapIncreaseKey(vector<int> &A, size_t pos, int key) {
-    while (pos > 0 && A[parent(pos)] < key) {
-        A[pos] = A[parent(pos)];
-        pos = parent(pos);
-    }
-    A[pos] = key;
+  while (pos > 0 && A[parent(pos)] < key) {
+    A[pos] = A[parent(pos)];
+    pos = parent(pos);
+  }
+  A[pos] = key;
 
 }
 
 void MaxHeapInsert(vector<int> &A, int key) {
-    A.push_back(INT_MAX);
-    HeapIncreaseKey(A, A.size()-1, key);
+  A.push_back(INT_MAX);
+  HeapIncreaseKey(A, A.size()-1, key);
 }
 
 void MaxHeapDelete(vector<int> &A, size_t i) {
-    A[i] = A.back();
-    A.pop_back();
-    MaxHeapify(A, A.size(), i); 
+  A[i] = A.back();
+  A.pop_back();
+  MaxHeapify(A, A.size(), i); 
 }
 
 /******************************************************************************/
@@ -105,11 +105,11 @@ void MaxHeapDelete(vector<int> &A, size_t i) {
 typedef vector<vector<int>> Matrix;
 
 bool IsYoungTableaus(Matrix &M) {
-    for (size_t i = 0; i < M.size(); ++i) {
-        for (size_t j = 1; j < M.front().size(); ++j) {
-            if (M[i][j-1] > M[i][j-1]) return false;
-        }
+  for (size_t i = 0; i < M.size(); ++i) {
+    for (size_t j = 1; j < M.front().size(); ++j) {
+      if (M[i][j-1] > M[i][j-1]) return false;
     }
+  }
     for (size_t j = 0; j < M.front().size(); ++j) {
         for (size_t i = 1; i < M.size(); ++i) {
             if (M[i-1][j] > M[i][j]) return false;
